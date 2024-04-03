@@ -1,4 +1,8 @@
 %% Simulate a IMX490 sensor
+%
+% Use s_sensorIMX490Test in ISETCam
+% This is obsolete, I think (BW).
+%
 % ieInit;
 DR = 1e5; % dynamic range
 nPatches = ceil(log2(DR));

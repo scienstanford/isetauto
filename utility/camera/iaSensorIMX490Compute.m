@@ -1,5 +1,5 @@
 function lrgb = iaSensorIMX490Compute(radiance,varargin)
-% Simulate a IMX490 sensor
+% Deprecated:  Use imx490Compute in ISETCam.
 %
 % https://thinklucid.com/tech-briefs/sony-imx490-hdr-sensor-and-flicker-mitigation/
 %
