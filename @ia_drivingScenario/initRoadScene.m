@@ -1,6 +1,6 @@
 function roadData = initRoadScene(obj, road_name, lighting)
-%% (Optional) isetdb() setup (using existing prefs)
-sceneDB = isetdb();
+%% (Optional) idb() setup (using existing prefs)
+sceneDB = idb();
 
 %% Find the road starter scene/asset and load it
 % If fullpath to the asset is not given, we will find it in our database

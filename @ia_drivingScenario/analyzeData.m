@@ -46,13 +46,13 @@ for ii = 1:numel(ourData)
     end
 
     % The next few we only show once
-    if isempty(foundPedPlot) && ourData(ii).foundPed
+    if isempty(foundPedPlot) && ~isempty(ourData(ii).foundPed)
         foundPedPlot = [simulationTime(ii), vehicleClosingSpeed(ii)];
     end
-    if isempty(warnPedPlot) && ourData(ii).warnPed
+    if isempty(warnPedPlot) && ~isempty(ourData(ii).warnPed)
         warnPedPlot = [simulationTime(ii), vehicleClosingSpeed(ii)];
     end
-    if isempty(crashedPlot) && ourData(ii).crashed
+    if isempty(crashedPlot) && ~isempty(ourData(ii).crashed)
         crashedPlot = [simulationTime(ii), vehicleClosingSpeed(ii)];
     end
 
