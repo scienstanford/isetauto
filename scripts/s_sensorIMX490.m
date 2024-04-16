@@ -37,7 +37,7 @@ oi = oiCompute(oi, scene,'aperture',aperture);
 oi = oiCrop(oi,'border');
 oiWindow(oi);
 oi = oiSet(oi,'displaymode','hdr');
-
+oi.wAngular = 32;
 oiDelta = oiGet(oi,'sample spacing','um');
 oiDelta = oiDelta(1);
 oiSize = oiGet(oi,'size');

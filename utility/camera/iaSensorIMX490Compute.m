@@ -36,7 +36,7 @@ p.addRequired('radiance',@isstruct);
 p.addParameter('pixelsize',2,@isscalar); % um
 p.addParameter('filmdiagonal',5,@isscalar); % [mm]
 p.addParameter('etime',1/4000,@isscalar); % 
-p.addParameter('noiseflag',2,@islogical);
+p.addParameter('noiseflag',2,@isnumeric);
 p.addParameter('analoggain',[1/32,1/16,1/2,1],@(x)isequal(numel(x),4));
 
 %%
@@ -140,14 +140,14 @@ sSize = sensorGet(sen_spixel_lgain, 'size');
 [X,  Y]  = meshgrid(1:sSize(2), 1:sSize(1));
 [Xq, Yq] = meshgrid(1:3:sSize(2), 1:3:sSize(1));
 
-sub_volts_1 = interp2(X,Y, sen_spixel_hgain.data.volts, Xq, Yq,"linear");
-sub_dvs_1   = interp2(X,Y, sen_spixel_hgain.data.dv, Xq, Yq,"linear");
+sub_volts_1 = interp2(X,Y, sen_spixel_hgain.data.volts, Xq, Yq, "linear");
+sub_dvs_1   = interp2(X,Y, sen_spixel_hgain.data.dv, Xq, Yq, "linear");
 
 sen_spixel_hgain = sensorSet(sen_spixel_hgain, 'volts', sub_volts_1);
 sen_spixel_hgain = sensorSet(sen_spixel_hgain, 'dv', sub_dvs_1);
 
-sub_volts_2 = interp2(X,Y, sen_spixel_lgain.data.volts, Xq, Yq,"linear");
-sub_dvs_2   = interp2(X,Y, sen_spixel_lgain.data.dv, Xq, Yq,"linear");
+sub_volts_2 = interp2(X,Y, sen_spixel_lgain.data.volts, Xq, Yq, "linear");
+sub_dvs_2   = interp2(X,Y, sen_spixel_lgain.data.dv, Xq, Yq, "linear");
 
 sen_spixel_lgain = sensorSet(sen_spixel_lgain, 'volts', sub_volts_2);
 sen_spixel_lgain = sensorSet(sen_spixel_lgain, 'dv', sub_dvs_2);
