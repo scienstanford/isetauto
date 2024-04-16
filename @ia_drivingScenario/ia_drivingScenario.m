@@ -17,16 +17,24 @@ classdef ia_drivingScenario < drivingScenario
         % Here we set properties unique to our sub-class, and over-ride others
         % that Matlab does set, as needed
         lighting = 'nighttime'; % skymap, if any
-        headlampType = 'level beam'; % also 'low beam', 'high beam', 'level beam'
+        headlampType = 'low beam'; % also 'low beam', 'high beam', 'level beam'
 
+        % Only used when we are doing object detection
         % This has to match the name in the DSD scene
         targetName = 'pedestrian_001'; % _001 is adult male
 
         %% Simulation specific parameters
-        stepTime = .5; % time (s) per image frame/step
+        % These can be be over-ridden in the run-time function
+        stepTime = .01; % time (s) per image frame/step
         scenarioQuality = 'quick'; % quick for testing, HD for quality, paper for publishing, etc. 
-        frameRate = 1; % playback speed in frames per second
-        scenarioLength = 5; % in seconds
+        scenarioLength = .1; % in seconds
+        
+        % fps of resulting video
+        frameRate = 10; %  speed in frames per second
+
+        % useObjectDetection
+        % TRUE for AEB cases, false if we just want images
+        useObjectDetection = false;
 
         % Object detector confidence threshold before we take action
         predictionThreshold = .9; % default is .95, lower for testing;

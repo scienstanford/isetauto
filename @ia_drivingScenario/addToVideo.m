@@ -10,6 +10,7 @@ if scenario.saveScenes
 end
 
 dRGB = double(image); % version for movie
+dRGB(isnan(dRGB)) = 0; % weed out NaNs that we're getting for some reason
 scenario.ourVideo(scenario.frameNum) = im2frame(dRGB);
 
 % last frame doesn't always show, so provide a couple extras
