@@ -170,7 +170,7 @@ tic
 %     obj_motorcycle = 0;
 % end
 %}
-pyScriptPath=fullfile(piRootPath,'data','sumo_input','generateJSON.py');
+pyScriptPath=fullfile(iaRootPath,'data','sumo_input','generateJSON.py');
 genJsonCmd="python "+pyScriptPath+" -f ";
 outputCmd=" -o vehicleState";
 sysCmd=genJsonCmd+flowFile+outputCmd;
