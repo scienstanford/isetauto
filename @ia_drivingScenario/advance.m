@@ -63,6 +63,11 @@ if scenario.justStarting ~= true && scenario.dataOnly == false
 
     % Here we want to create a movie/video
     addToVideo(scenario, scene, image, crashed);
+
+    % We may also want to write out scene/OI files
+    if scenario.writeSceneFiles
+        
+    end
     
     scenario.logFrameData(scene, scenario.detectionResults); % update our logging data structure
     

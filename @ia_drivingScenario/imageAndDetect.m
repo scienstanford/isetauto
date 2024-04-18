@@ -25,12 +25,13 @@ shutterspeed = 1/30; % typical of auto video cameras
 fNumber = 1.4;
 analogGain = 10; % off of native ISO
 
-% We probably want to return the IP or something besides the
-% annotated image...
-% I think we need to do this slightly differently...
-ip = piRadiance2RGB(scene,'etime',shutterspeed,'sensor',useSensor, ...
-    'fNumber', fNumber, 'analoggain', analogGain);
-
+if isequal(scene.type, 'opticalimage')
+    shutterspeed = scenario.stepTime;
+    ip = piRadiance2RGB(scene,'etime',shutterspeed,'sensor',useSensor);
+else
+    ip = piRadiance2RGB(scene,'etime',shutterspeed,'sensor',useSensor, ...
+        'fNumber', fNumber, 'analoggain', analogGain);
+end
 % Experiment with denoising after image capture
 if isequal(scenario.deNoise, 'rgb')
     ip = piRGBDenoise(ip);

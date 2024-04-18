@@ -25,17 +25,20 @@ classdef ia_drivingScenario < drivingScenario
 
         %% Simulation specific parameters
         % These can be be over-ridden in the run-time function
-        stepTime = .01; % time (s) per image frame/step
+        stepTime = .2; % time (s) per image frame/step
         scenarioQuality = 'quick'; % quick for testing, HD for quality, paper for publishing, etc. 
-        scenarioLength = .1; % in seconds
+        scenarioLength = 5; % in seconds
         
         % fps of resulting video
-        frameRate = 10; %  speed in frames per second
+        frameRate = 5; %  speed in frames per second
 
         % useObjectDetection
         % TRUE for AEB cases, false if we just want images
-        useObjectDetection = false;
-
+        useObjectDetection = true;
+        % True if we want to preserve the Scene/OI data
+        writeSceneFiles = false;
+        sceneFileDir = ''; % gets set to local/scenename
+        
         % Object detector confidence threshold before we take action
         predictionThreshold = .9; % default is .95, lower for testing;
         % threhold for turning on adaptive headlights

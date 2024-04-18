@@ -1,11 +1,11 @@
 function addToVideo(scenario, scene, image, crashed)
 
 % Save out our scene list each frame, so we have it for later
-saveName = fullfile(iaDirGet('local'),'demo_scenes.mat');
+saveName = fullfile(scenario.sceneFileDir,'scene_OIs.mat');
 scenesToSave = scenario.sceneList;
 
 %% NOTE: This is really expensive. Should probably change to do at end
-if scenario.saveScenes
+if scenario.writeSceneFiles
     save(saveName, 'scenesToSave', "-v7.3");
 end
 

@@ -65,7 +65,7 @@ vehicleVelocity = {};
     end
 end
 %% Write out a video of our run if we recorded one
-if numel(obj.ourVideo) > 0
+if numel(obj.ourVideo) > 1
     open(obj.v);
     writeVideo(obj.v, obj.ourVideo);
     close(obj.v);

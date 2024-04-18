@@ -15,6 +15,15 @@ roadData = roadgen('road directory',road_name, 'asset directory', sceneDB);
 sceneName = road_name;
 roadData.recipe.set('outputfile',fullfile(piDirGet('local'),sceneName,[sceneName,'.pbrt']));
 
+%% If we want to write out OI files we need
+%  a camera with lens
+if obj.writeSceneFiles
+    lensname    = 'dgauss.22deg.12.5mm.json';
+    doubleGauss = piCameraCreate('omni','lens file',lensname);
+    roadData.recipe.set('camera',doubleGauss);
+    obj.sceneFileDir = fullfile(piDirGet('local'),sceneName);
+end
+
 %% Fix lighting
 % There is some weird light in this scene that we need to remove:
 roadData.recipe.set('light','all','delete');

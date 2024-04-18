@@ -77,9 +77,23 @@ sensor = visionDetectionGenerator('SensorIndex', 1, ...
 function [scenario, egoVehicle] = createDrivingScenario
 % createDrivingScenario Returns the drivingScenario defined in the Designer
 
-% Construct a drivingScenario object.
-scenario = ia_drivingScenario('StopTime', 0.01, ...
-    'SampleTime', 0.001);
+%% Construct a drivingScenario object.
+% THIS NEEDS TO BE MANUALLY EDITED FOR ANY OVERRIDES
+%   SampleTime           - duration of time between updates
+%   StopTime             - time at which to stop simulation
+%  
+scenario = ia_drivingScenario('SampleTime', .001, ...
+    'StopTime', .005);
+% Set parameters for generating OI frames
+% the times might get inherited automatically?
+% set again, just in case
+scenario.SampleTime = .001;
+
+scenario.stepTime = .001;
+scenario.StopTime = .005;
+scenario.useObjectDetection = false;
+scenario.writeSceneFiles = true;
+scenario.frameRate = 1;
 
 % Add all road segments
 roadCenters = [-119.91220007542 0.28026685394776 0;

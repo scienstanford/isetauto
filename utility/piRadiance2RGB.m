@@ -72,7 +72,7 @@ elseif ~strcmp(radiance.type,'opticalimage')
 else
     oi = radiance;
 end
-pixelSize = oiGet(oi,'width spatial resolution','microns');
+pixelSize = oiGet(oi,'wspatial resolution','microns');
 
 %% oi to sensor
 if isempty(sensorName)
