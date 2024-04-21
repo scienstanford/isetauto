@@ -13,10 +13,35 @@
 %
 % See also
 
-%%
+%% Download a light group
 
+% The metadata and the rendered images
+user = 'wandell';
+host = 'orange.stanford.edu';
+
+% Prepare the local directory
 imageID = '1114091636';
+destPath = fullfile(iaRootPath,'local',imageID);
+if ~exist(destPath,'dir'), mkdir(destPath); end
+
+% First the metadata
 metaFolder = '/acorn/data/iset/isetauto/Ford/SceneMetadata';
+src  = fullfile(metaFolder,[imageID,'.mat']);
+ieSCP(user,host,src,destPath);
+load(fullfile(destPath,[imageID,'.mat']),'sceneMeta');
+
+% Now the four light group EXR files
+lgt = {'headlights','streetlights','otherlights','skymap'};
+destFile = cell(4,1);
+for ll = 1:numel(lgt)
+    thisFile = sprintf('%s_%s.exr',imageID,lgt{ll});
+    srcFile  = fullfile(sceneMeta.datasetFolder,thisFile);
+    destFile{ii} = fullfile(destPath,thisFile);
+    ieSCP(user,host,srcFile,destFile{ii});
+end
+
+%% We have the files.  Make some images
+
 parameters.fnumber = 1.7;
 parameters.focallength = 4.38e-3;
 parameters.nsides = 20;
@@ -59,3 +84,5 @@ ip = piRadiance2RGB(oi,'etime',1/30,'analoggain',1/10);
 % ip = ipCompute(ip, sensor);
  
 ipWindow(ip)
+
+%%
