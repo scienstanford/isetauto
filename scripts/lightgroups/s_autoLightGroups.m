@@ -51,21 +51,53 @@ parameters.sensormodel = 'ar0132at';
 parameters.pixelsize = 1.4e-6;
 parameters.analoggain = 1/5; % 3 times
 parameters.exposuretime = 1/60;
- 
-sceneMeta = load(fullfile(metaFolder, [imageID, '.mat']));
- 
-scenes{1} = piEXR2ISET(fullfile(sceneMeta.sceneMeta.datasetFolder,[imageID,'_headlights.exr']));
-scenes{2} = piEXR2ISET(fullfile(sceneMeta.sceneMeta.datasetFolder,[imageID,'_streetlights.exr']));
-scenes{3} = piEXR2ISET(fullfile(sceneMeta.sceneMeta.datasetFolder,[imageID,'_otherlights.exr']));
-scenes{4} = piEXR2ISET(fullfile(sceneMeta.sceneMeta.datasetFolder,[imageID,'_skymap.exr']));
- 
-wgts = [0.1, 0.1, 0.02, 0.01]; % night
-% wgts = [0.01, 0.001, 0.005, 10];
- 
-scene = sceneAdd(scenes, wgts);
- 
-scene = piAIdenoise(scene);
 
+
+load(fullfile(destPath, [imageID, '.mat']),'sceneMeta');
+
+% Now the four light group EXR files
+lgt = {'headlights','streetlights','otherlights','skymap'};
+scenes = cell(numel(lgt,1));
+for ll = 1:numel(lgt)
+    thisFile = sprintf('%s_%s.exr',imageID,lgt{ll});
+    srcFile  = fullfile(sceneMeta.datasetFolder,thisFile);
+    destFile = fullfile(destPath,thisFile);
+    ieSCP(user,host,srcFile,destFile);
+    scenes{ll} = piEXR2ISET(destFile);
+end
+
+%% Just show the point lights
+wgts = [1 1 1 0];
+scene = sceneAdd(scenes, wgts);
+scene = piAIdenoise(scene);
+sceneWindow(scene);
+
+%% Just the headlights
+wgts = [1 0 0 0];
+scene = sceneAdd(scenes, wgts);
+scene.metadata.wgts = wgts;
+scene = piAIdenoise(scene);
+sceneWindow(scene);
+
+%% Just the skymap
+wgts = [0 0 0 1];
+scene = sceneAdd(scenes, wgts);
+scene.metadata.wgts = wgts;
+scene = piAIdenoise(scene);
+sceneWindow(scene);
+
+%% 
+wgts = [0.1, 0.1, 0.02, 0.001]; % night
+scene = sceneAdd(scenes, wgts);
+scene.metadata.wgts = wgts;
+scene = piAIdenoise(scene);
+% sceneWindow(scene);
+% scene = sceneSet(scene,'render flag','hdr');
+% scene = sceneSet(scene,'gamma',2.1);
+%{
+ lum = sceneGet(scene,'luminance');
+ ieNewGraphWin; mesh(log10(lum));
+%}
 %% We could convert the scene via wvf in various ways
 
 % [aperture, params] = wvfAperture(wvf,'nsides',0,...
