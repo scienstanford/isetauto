@@ -122,16 +122,47 @@ ipWindow(ip);
 %%  The RGB filters differ a lot and thus the rendering differs
 
 sensor2 = sensorCreate('rgbw');
-sensor2 = sensorSet(sensor2,'size',sensorGet(sensor,'size'));
+sensor2 = sensorSet(sensor2,'match oi',oi);
 sensor2 = sensorSet(sensor2,'name','rgbw');
-sensor2 = sensorSet(sensor2,'pixel size constant fill factor',[1.4 1.4]*1e-6);
-sensor2 = sensorSet(sensor2,'fov',sensorGet(sensor,'fov'),oi);
-sensor2 = sensorSet(sensor2,'exp time',0.033);
+
+% Match the color filters
+%{
+% I do not understand why, but when I do this the transformation gets
+% way off.
+F = sensorGet(sensor,'filter transmissivities');
+F2 = sensorGet(sensor2,'filter transmissivities');
+F2(:,1:3) = F(:,1:3)*1;
+wave = sensorGet(sensor,'wave');
+ir = ieReadSpectra('infrared2',wave);
+F2 = diag(ir)*F2;
+
+sensor2 = sensorSet(sensor2,'filter spectra',F2);
+sensorPlot(sensor2,'spectral qe')
+
+% Try tracking this through.  
+T = ieColorTransform(sensor2,'XYZ','D65','mcc');
+%}
+
+sensor2 = sensorSet(sensor2,'exp time',16*1e-3);
 sensor2 = sensorCompute(sensor2,oi);
 % sensorWindow(sensor2);
 
 ip = ipCompute(ip,sensor2);
-ip = ipSet(ip,'name',sensorGet(sensor2,'name'));
+%{
+tList = ipGet(ip,'each transform');
+tList{1}
+tList{2}
+tList{3}
+cTrans = ipGet(ip,'combined transform')
+
+% We want D65 times the sensors times this to be 1,1,1
+% Not that close.
+wave = sensorGet(sensor2,'wave');
+d65 = ieReadSpectra('D65',wave);
+spectralQE = sensorGet(sensor2,'spectral qe');
+d65'*spectralQE*cTrans
+
+%}
 ipWindow(ip);
 
 %%
