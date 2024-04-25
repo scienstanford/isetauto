@@ -160,7 +160,12 @@ sensor2 = sensorCompute(sensor2,oi);
 % sensorWindow(sensor2);
 
 ip = ipSet(ip,'transform method','adaptive');
+
+% Not working here, via imageSensorTransform, but works in comment version.
+ip = ipSet(ip,'render whitept',true);
 ip = ipCompute(ip,sensor2);
+ipWindow(ip);
+
 %{
 tList = ipGet(ip,'each transform');
 tList{1}
@@ -180,7 +185,9 @@ wave = sensorGet(sensor2,'wave');
 d65 = ieReadSpectra('D65',wave);
 spectralQE = sensorGet(sensor2,'spectral qe');
 sensorLight = d65'*spectralQE;
-sensorWhite = sensorLight*tList{1}/100
+sensorLight = sensorLight / max(sensorLight);
+tList = ipGet(ip,'each transform');
+sensorWhite = sensorLight*tList{1};
 tmp = tList{1} * diag( 1 ./ sensorWhite)
 sensorLight*tmp
 ip = ipSet(ip,'sensor conversion matrix',tmp);
