@@ -91,15 +91,29 @@ scene = sceneSet(scene,'gamma',2.1);
  lum = sceneGet(scene,'luminance');
  ieNewGraphWin; mesh(log10(lum));
 %}
+
+%% If you want, crop out the headlight region of the scene for testing
+% You can do this in the window, get the scene, and find the crop
+%
+% sceneHeadlight = ieGetObject('scene'); 
+%
+
+% This is an example crop for the headlights on the green car.
+rect = [270   351   533   528];
+sceneHeadlight = sceneCrop(scene,rect);
+sceneWindow(sceneHeadlight);
+oi = oiCreate('wvf');
+oi = oiCompute(oi,scene,'crop',true);
+
 %% We could convert the scene via wvf in various ways
 
-wvf = wvfCreate;
+[oi,wvf] = oiCreate('wvf');
 [aperture, params] = wvfAperture(wvf,'nsides',3,...
     'dot mean',50, 'dot sd',20, 'dot opacity',0.5,'dot radius',5,...
     'line mean',50, 'line sd', 20, 'line opacity',0.5,'linewidth',2);
 
-oi = oiCreate('wvf');
-oi = oiCompute(oi, scene,'aperture',aperture,'crop',true);
+
+oi = oiCompute(oi, sceneHeadlight,'aperture',aperture,'crop',true);
 % oiWindow(oi);
 
 %
