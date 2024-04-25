@@ -116,7 +116,7 @@ oi = oiCompute(oi,scene,'crop',true);
 oi = oiCompute(oi, sceneHeadlight,'aperture',aperture,'crop',true);
 % oiWindow(oi);
 
-%
+%%
 [ip, sensor] = piRadiance2RGB(oi,'etime',1/30,'analoggain',1/10);
 % sensor = sensorSet(sensor, 'pixel size', 4e-6);
 % sensor = sensorSet(sensor, 'exposure time', 1/30);
