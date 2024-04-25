@@ -101,9 +101,8 @@ scene = sceneSet(scene,'gamma',2.1);
 % This is an example crop for the headlights on the green car.
 rect = [270   351   533   528];
 sceneHeadlight = sceneCrop(scene,rect);
+% sceneHeadlight = piAIdenoise(sceneHeadlight);
 sceneWindow(sceneHeadlight);
-oi = oiCreate('wvf');
-oi = oiCompute(oi,scene,'crop',true);
 
 %% We could convert the scene via wvf in various ways
 
@@ -111,7 +110,6 @@ oi = oiCompute(oi,scene,'crop',true);
 [aperture, params] = wvfAperture(wvf,'nsides',3,...
     'dot mean',50, 'dot sd',20, 'dot opacity',0.5,'dot radius',5,...
     'line mean',50, 'line sd', 20, 'line opacity',0.5,'linewidth',2);
-
 
 oi = oiCompute(oi, sceneHeadlight,'aperture',aperture,'crop',true);
 % oiWindow(oi);
@@ -161,6 +159,7 @@ sensor2 = sensorSet(sensor2,'exp time',16*1e-3);
 sensor2 = sensorCompute(sensor2,oi);
 % sensorWindow(sensor2);
 
+ip = ipSet(ip,'transform method','adaptive');
 ip = ipCompute(ip,sensor2);
 %{
 tList = ipGet(ip,'each transform');
@@ -169,13 +168,25 @@ tList{2}
 tList{3}
 cTrans = ipGet(ip,'combined transform')
 
-% We want D65 times the sensors times this to be 1,1,1
-% Not that close.
+tList{1} = tList{1} * diag( 1 ./ sum(tList{1}));
+ones(1,4)*tList{1}
+ip = ipSet(ip,'sensor conversion matrix',tList{1});
+ip = ipSet(ip, 'transform method', 'current');
+ip = ipCompute(ip,sensor2);
+ipWindow(ip);
+
+% Maybe we want D65 times the sensors to map into 1,1,1
 wave = sensorGet(sensor2,'wave');
 d65 = ieReadSpectra('D65',wave);
 spectralQE = sensorGet(sensor2,'spectral qe');
-d65'*spectralQE*cTrans
-
+sensorLight = d65'*spectralQE;
+sensorWhite = sensorLight*tList{1}/100
+tmp = tList{1} * diag( 1 ./ sensorWhite)
+sensorLight*tmp
+ip = ipSet(ip,'sensor conversion matrix',tmp);
+ip = ipSet(ip, 'transform method', 'current');
+ip = ipCompute(ip,sensor2);
+ipWindow(ip);
 %}
 ipWindow(ip);
 
