@@ -184,15 +184,10 @@ ipWindow(ip);
 wave = sensorGet(sensor2,'wave');
 d65 = ieReadSpectra('D65',wave);
 spectralQE = sensorGet(sensor2,'spectral qe');
-sensorLight = d65'*spectralQE;
-sensorLight = sensorLight / max(sensorLight);
-tList = ipGet(ip,'each transform');
-sensorWhite = sensorLight*tList{1};
-tmp = tList{1} * diag( 1 ./ sensorWhite)
-sensorLight*tmp
-ip = ipSet(ip,'sensor conversion matrix',tmp);
-ip = ipSet(ip, 'transform method', 'current');
-ip = ipCompute(ip,sensor2);
+
+% Adjust the sensor conversion matrix so the light direction maps into
+% sensor direction 1,1,1.  For XYZ that is equal energy.
+ip = ipSet(ip,'render white pt',d65,spectralQE);
 ipWindow(ip);
 %}
 ipWindow(ip);
