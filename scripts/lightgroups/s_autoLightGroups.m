@@ -10,8 +10,10 @@
 % This is the folder on acron contaning the scene groups
 %   metaFolder = '/acorn/data/iset/isetauto/Ford/SceneMetadata';
 %
-%
 % See also
+
+%%
+ieInit;
 
 %% Download a light group
 
@@ -78,12 +80,16 @@ scene = piAIdenoise(scene);
 sceneWindow(scene);
 
 %%  Combine them into a merged radiance scene
-
-wgts = [0.1, 0.1, 0.02, 0.001]; % night
+% head, street, other, sky
+% wgts = [0.1, 0.1, 0.02, 0.001]; % night
+wgts = [0.02, 0.1, 0.02, 0.00001]; % night
 scene = sceneAdd(scenes, wgts);
 scene.metadata.wgts = wgts;
+
+%% Denoise and show
 scene = piAIdenoise(scene);
 sceneWindow(scene);
+
 scene = sceneSet(scene,'render flag','hdr');
 scene = sceneSet(scene,'gamma',2.1);
 
@@ -112,84 +118,74 @@ sceneWindow(sceneHeadlight);
     'line mean',50, 'line sd', 20, 'line opacity',0.5,'linewidth',2);
 
 oi = oiCompute(oi, sceneHeadlight,'aperture',aperture,'crop',true);
-% oiWindow(oi);
+%{
+oiWindow(oi);
+oi = oiSet(oi,'render flag','hdr');
+oi = oiSet(oi,'gamma',2.1);
+%}
 
-%%
+%%  Create the ip and the default ISETAuto sensor
+
 [ip, sensor] = piRadiance2RGB(oi,'etime',1/30,'analoggain',1/10);
-% sensor = sensorSet(sensor, 'pixel size', 4e-6);
-% sensor = sensorSet(sensor, 'exposure time', 1/30);
-% sensor = sensorCompute(sensor, oi);
-% ip = ipCompute(ip, sensor);
- 
 ipWindow(ip);
 
+%% Turn off the noise and recompute
 
-%%
 sensor = sensorSet(sensor,'noiseFlag',0);
 sensor = sensorSet(sensor,'name','noise free');
 sensor = sensorCompute(sensor,oi);
 ip = ipCompute(ip,sensor);
 ipWindow(ip);
 
-%%  The RGB filters differ a lot and thus the rendering differs
+%%  Use the RGBW sensor
 
-sensor2 = sensorCreate('rgbw');
-sensor2 = sensorSet(sensor2,'match oi',oi);
-sensor2 = sensorSet(sensor2,'name','rgbw');
+sensorRGBW = sensorCreate('rgbw');
+sensorRGBW = sensorSet(sensorRGBW,'match oi',oi);
+sensorRGBW = sensorSet(sensorRGBW,'name','rgbw');
+sensorRGBW = sensorSet(sensorRGBW,'exp time',16*1e-3);
+sensorRGBW = sensorCompute(sensorRGBW,oi);
+sensorPlot(sensorRGBW,'spectral qe')
+% sensorWindow(sensorRGBW);
+
+%{
+qe = sensorGet(sensorRGBW,'spectral qe');
+cond(qe)
+%}
+
+%% Not working here, via imageSensorTransform, but works in comment version.
+
+ip = ipCompute(ip,sensorRGBW);  % It would be nice to not have to run the whole thing
+ip = ipSet(ip,'transform method','adaptive');
+ip = ipSet(ip,'demosaic method','bilinear');
+illE = sceneGet(scene,'illuminant energy');
+ip = ipSet(ip,'render whitept',illE, sensorRGBW);
+ip = ipCompute(ip,sensorRGBW);
+ipWindow(ip);
+
+%%  Change the RGB filters and try again
 
 % Match the color filters
-%{
-% I do not understand why, but when I do this the transformation gets
-% way off.
-F = sensorGet(sensor,'filter transmissivities');
-F2 = sensorGet(sensor2,'filter transmissivities');
-F2(:,1:3) = F(:,1:3)*1;
+F1 = sensorGet(sensor,'filter transmissivities');
+F2 = sensorGet(sensorRGBW,'filter transmissivities');
+F2(:,1:3) = F1(:,1:3)*1;
 wave = sensorGet(sensor,'wave');
 ir = ieReadSpectra('infrared2',wave);
 F2 = diag(ir)*F2;
 
-sensor2 = sensorSet(sensor2,'filter spectra',F2);
+sensor2 = sensorSet(sensorRGBW,'filter spectra',F2);
 sensorPlot(sensor2,'spectral qe')
 
-% Try tracking this through.  
-T = ieColorTransform(sensor2,'XYZ','D65','mcc');
+%{
+% The condition number is worse with these filters.
+qe = sensorGet(sensor2,'spectral qe');
+cond(qe)
 %}
-
-sensor2 = sensorSet(sensor2,'exp time',16*1e-3);
-sensor2 = sensorCompute(sensor2,oi);
-% sensorWindow(sensor2);
 
 ip = ipSet(ip,'transform method','adaptive');
-
-% Not working here, via imageSensorTransform, but works in comment version.
-ip = ipSet(ip,'render whitept',true);
+ip = ipSet(ip,'demosaic method','bilinear');
+illE = sceneGet(scene,'illuminant energy');
+ip = ipSet(ip,'render whitept',illE, sensor2);
 ip = ipCompute(ip,sensor2);
-ipWindow(ip);
-
-%{
-tList = ipGet(ip,'each transform');
-tList{1}
-tList{2}
-tList{3}
-cTrans = ipGet(ip,'combined transform')
-
-tList{1} = tList{1} * diag( 1 ./ sum(tList{1}));
-ones(1,4)*tList{1}
-ip = ipSet(ip,'sensor conversion matrix',tList{1});
-ip = ipSet(ip, 'transform method', 'current');
-ip = ipCompute(ip,sensor2);
-ipWindow(ip);
-
-% Maybe we want D65 times the sensors to map into 1,1,1
-wave = sensorGet(sensor2,'wave');
-d65 = ieReadSpectra('D65',wave);
-spectralQE = sensorGet(sensor2,'spectral qe');
-
-% Adjust the sensor conversion matrix so the light direction maps into
-% sensor direction 1,1,1.  For XYZ that is equal energy.
-ip = ipSet(ip,'render white pt',d65,spectralQE);
-ipWindow(ip);
-%}
 ipWindow(ip);
 
 %%
