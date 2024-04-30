@@ -18,6 +18,7 @@ classdef ia_drivingScenario < drivingScenario
         % that Matlab does set, as needed
         lighting = 'nighttime'; % skymap, if any
         headlampType = 'low beam'; % also 'low beam', 'high beam', 'level beam'
+        useLightGroups = true; % render each set of lights separately
 
         % Only used when we are doing object detection
         % This has to match the name in the DSD scene
@@ -34,11 +35,11 @@ classdef ia_drivingScenario < drivingScenario
 
         % useObjectDetection
         % TRUE for AEB cases, false if we just want images
-        useObjectDetection = true;
+        useObjectDetection = false;
         % True if we want to preserve the Scene/OI data
-        writeSceneFiles = false;
+        writeSceneFiles = true;
         sceneFileDir = ''; % gets set to local/scenename
-        
+
         % Object detector confidence threshold before we take action
         predictionThreshold = .9; % default is .95, lower for testing;
         % threhold for turning on adaptive headlights
@@ -46,7 +47,7 @@ classdef ia_drivingScenario < drivingScenario
         
         %% Runtime settings
         % show each scene in a window (adds a lot of time)
-        previewScenes = true; % show scenes as we go
+        previewScenes = false; % show scenes as we go
         % save scenes as we go, also very expensive
         saveScenes = false; % Save scenes as we go 
 
@@ -64,7 +65,8 @@ classdef ia_drivingScenario < drivingScenario
 
         %% TestRig specific parameters
         sensorModel = 'MT9V024SensorRGB'; % one of our automotive sensors
-
+        lensFile = 'wide.77deg.4.38mm.json';
+        
         %% Housekeeping parameters
         roadData = []; % our ISETAuto road data struct
         numActors = 0; % initialize

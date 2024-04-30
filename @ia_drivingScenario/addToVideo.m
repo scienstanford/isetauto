@@ -30,11 +30,9 @@ end
 
 % This creates a "checkpoint" video every frame
 % but certainly wasteful -- else we just do it at the end
-%{
 open(scenario.v);
 writeVideo(scenario.v, scenario.ourVideo);
 close(scenario.v);
-%}
 
 scenario.frameNum = scenario.frameNum + 1;
 

@@ -4,7 +4,7 @@ function running = advance(scenario)
 persistent originalOutputFile;
 persistent keepRunning; % turn off when we have one frame left
 crashed = false; % default state
-running = true; 
+running = true;
 
 % Need to place vehicles and actors now that we hopefully have yaw data
 % Just do this once:
@@ -42,36 +42,42 @@ if scenario.justStarting ~= true && scenario.dataOnly == false
     % outfile for each thread, but we don't need a new one
     % for each iteration, to the extent it matters
 
-    scene = scenario.renderRecipe(originalOutputFile); % do the hard work of rendering
+    % Add an option here to for lightgroup support
+    if exist('scenario.useLightGroups') && scenario.useLightGroups
+        warning('not supported');
+        % make a cell array of per light group recipes
+        recipeList = iaLightsGroup(scenario.roadData.recipe);
+    else
+        scene = scenario.renderRecipe(originalOutputFile); % do the hard work of rendering
 
-    % show preview if desired
-    if scenario.previewScenes
-        
-        % We use HDR with oncoming lights, but Standard
-        % is more "accurate" for dark scenes
-        %scene = sceneSet(scene, 'display mode', 'hdr');
-        
-        % Can also use sceneshowimage
-        % Note: Faster but leads to un-labeled Window sprawl until we
-        %       add some more pieces
-        %sceneShowImage(scene, 3);
-        sceneWindow(scene);
+        % show preview if desired
+        if scenario.previewScenes
+
+            % We use HDR with oncoming lights, but Standard
+            % is more "accurate" for dark scenes
+            %scene = sceneSet(scene, 'display mode', 'hdr');
+
+            % Can also use sceneshowimage
+            % Note: Faster but leads to un-labeled Window sprawl until we
+            %       add some more pieces
+            %sceneShowImage(scene, 3);
+            %sceneWindow(scene);
+        end
+
+        % Create an image with a camera, and run a detector on it
+        [image, crashed] = scenario.imageAndDetect(scene);
+
+        % Here we want to create a movie/video
+        addToVideo(scenario, scene, image, crashed);
+
+        % We may also want to write out scene/OI files
+        if scenario.writeSceneFiles
+
+        end
+
+        scenario.logFrameData(scene, scenario.detectionResults); % update our logging data structure
     end
-
-    % Create an image with a camera, and run a detector on it
-    [image, crashed] = scenario.imageAndDetect(scene);
-
-    % Here we want to create a movie/video
-    addToVideo(scenario, scene, image, crashed);
-
-    % We may also want to write out scene/OI files
-    if scenario.writeSceneFiles
-        
-    end
-    
-    scenario.logFrameData(scene, scenario.detectionResults); % update our logging data structure
-    
-% only collect trajectory data
+    % only collect trajectory data
 elseif scenario.dataOnly && ~scenario.justStarting
     ourRecipe = scenario.roadData.recipe;
     [pp, nn, ee] = fileparts(originalOutputFile);
@@ -109,7 +115,7 @@ for ii = 1:numel(scenario.roadData.actorsIA)
     if isempty(scenario.targetObject) && isequal(ourActor.name, scenario.targetName)
         scenario.targetObject = ourActor;
     end
-    
+
     if ourActor.hasCamera
         ourActorDS = scenario.roadData.actorsDS{ii};
         if scenario.needEgoVelocity
@@ -123,7 +129,7 @@ for ii = 1:numel(scenario.roadData.actorsIA)
             end
             scenario.needEgoVelocity = false;
         end
-        
+
         % If we might have a ped, turn a headlight on high
         % (Currently always the right headlamp)
         if scenario.warnPed == true
@@ -160,12 +166,12 @@ for ii = 1:numel(scenario.roadData.actorsIA)
             vehicleSpeed(waypointsFuture) = ...
                 max(vehicleSpeed(vehicleWaypoints(:,1)>ourLocation) ...
                 + deceleration(1), 0); % can't go backwards
-            
+
             % Braking shouldn't ever cause backward motion
             % And if we don't have a positive speed, DSD freaks out
             newSpeed = max(vehicleSpeed + -1 * sum(deceleration.^2)^.5,0.01);
             scenario.egoVehicle.trajectory(vehicleWaypoints, newSpeed);
-            
+
 
         end
 
@@ -191,7 +197,7 @@ for ii = 1:numel(scenario.roadData.actorsIA)
         currentActor.Velocity(1), ...
         currentActor.Velocity(2), ...
         currentActor.Velocity(3));
-    
+
     % Print yaw if needed for debugging
     %cprintf('*Blue', ", DSyaw: %2.1f\n", currentActor.Yaw);
 
@@ -203,7 +209,7 @@ for ii = 1:numel(scenario.roadData.actorsIA)
 end
 
 % stop on crash or after processing final frame
-if crashed || (~isempty(keepRunning) && ~keepRunning) 
+if crashed || (~isempty(keepRunning) && ~keepRunning)
     running = false;
     clear keepRunning; % otherwise it persists to next run!
 else
