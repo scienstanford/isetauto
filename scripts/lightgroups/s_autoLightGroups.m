@@ -22,7 +22,7 @@ user = 'wandell';
 host = 'orange.stanford.edu';
 
 % Prepare the local directory
-imageID = '1114091636';
+imageID = '1114011756';
 % 1114091636 - People on street
 % 1114011756 - Vans moving away, person
 % 1113094429
@@ -59,6 +59,7 @@ end
 
 %% Combine the scenes
 
+%{
 %% Just show the point lights
 wgts = [1 1 1 0];
 scene = sceneAdd(scenes, wgts);
@@ -78,6 +79,7 @@ scene = sceneAdd(scenes, wgts);
 scene.metadata.wgts = wgts;
 scene = piAIdenoise(scene);
 sceneWindow(scene);
+%}
 
 %%  Combine them into a merged radiance scene
 % head, street, other, sky
@@ -91,7 +93,7 @@ scene = piAIdenoise(scene);
 sceneWindow(scene);
 
 scene = sceneSet(scene,'render flag','hdr');
-scene = sceneSet(scene,'gamma',2.1);
+scene = sceneSet(scene,'gamma',1);
 
 %{
  lum = sceneGet(scene,'luminance');
@@ -99,16 +101,27 @@ scene = sceneSet(scene,'gamma',2.1);
 %}
 
 %% If you want, crop out the headlight region of the scene for testing
+%
 % You can do this in the window, get the scene, and find the crop
 %
 % sceneHeadlight = ieGetObject('scene'); 
 %
+% TODO:  Add crop to the scene window pull down.
+%
+switch imageID
+    case '1114011756'
+        % Focused on the person
+        rect = [659   349   934   487];  % 1114011756
+        thisScene = sceneCrop(scene,rect);
+    case '1114091636'
+        % This is an example crop for the headlights on the green car.
+        rect = [270   351   533   528];  % 1114091636
+        thisScene = sceneCrop(scene,rect);
+    otherwise
+        error('Unknown imageID')
+end
 
-% This is an example crop for the headlights on the green car.
-rect = [270   351   533   528];
-sceneHeadlight = sceneCrop(scene,rect);
-% sceneHeadlight = piAIdenoise(sceneHeadlight);
-sceneWindow(sceneHeadlight);
+sceneWindow(thisScene);
 
 %% We could convert the scene via wvf in various ways
 
@@ -117,11 +130,11 @@ sceneWindow(sceneHeadlight);
     'dot mean',50, 'dot sd',20, 'dot opacity',0.5,'dot radius',5,...
     'line mean',50, 'line sd', 20, 'line opacity',0.5,'linewidth',2);
 
-oi = oiCompute(oi, sceneHeadlight,'aperture',aperture,'crop',true);
+oi = oiCompute(oi, thisScene,'aperture',aperture,'crop',true);
 %{
 oiWindow(oi);
 oi = oiSet(oi,'render flag','hdr');
-oi = oiSet(oi,'gamma',2.1);
+oi = oiSet(oi,'gamma',1);
 %}
 
 %%  Create the ip and the default ISETAuto sensor
@@ -142,50 +155,24 @@ ipWindow(ip);
 sensorRGBW = sensorCreate('rgbw');
 sensorRGBW = sensorSet(sensorRGBW,'match oi',oi);
 sensorRGBW = sensorSet(sensorRGBW,'name','rgbw');
-sensorRGBW = sensorSet(sensorRGBW,'exp time',16*1e-3);
-sensorRGBW = sensorCompute(sensorRGBW,oi);
-sensorPlot(sensorRGBW,'spectral qe')
-% sensorWindow(sensorRGBW);
 
 %{
 qe = sensorGet(sensorRGBW,'spectral qe');
 cond(qe)
 %}
 
-%% Not working here, via imageSensorTransform, but works in comment version.
-
-ip = ipCompute(ip,sensorRGBW);  % It would be nice to not have to run the whole thing
-ip = ipSet(ip,'transform method','adaptive');
-ip = ipSet(ip,'demosaic method','bilinear');
-illE = sceneGet(scene,'illuminant energy');
-ip = ipSet(ip,'render whitept',illE, sensorRGBW);
-ip = ipCompute(ip,sensorRGBW);
-ipWindow(ip);
-
-%%  Change the RGB filters and try again
-
-% Match the color filters
-F1 = sensorGet(sensor,'filter transmissivities');
-F2 = sensorGet(sensorRGBW,'filter transmissivities');
-F2(:,1:3) = F1(:,1:3)*1;
-wave = sensorGet(sensor,'wave');
-ir = ieReadSpectra('infrared2',wave);
-F2 = diag(ir)*F2;
-
-sensor2 = sensorSet(sensorRGBW,'filter spectra',F2);
-sensorPlot(sensor2,'spectral qe')
-
-%{
-% The condition number is worse with these filters.
-qe = sensorGet(sensor2,'spectral qe');
-cond(qe)
-%}
-
-ip = ipSet(ip,'transform method','adaptive');
-ip = ipSet(ip,'demosaic method','bilinear');
-illE = sceneGet(scene,'illuminant energy');
-ip = ipSet(ip,'render whitept',illE, sensor2);
-ip = ipCompute(ip,sensor2);
-ipWindow(ip);
+expDuration = [1/15, 1/30, 1/60];
+for dd = 1:numel(expDuration)
+    sensorRGBW = sensorSet(sensorRGBW,'exp time',expDuration(dd));
+    sensorRGBW = sensorCompute(sensorRGBW,oi);
+    ip = ipCompute(ip,sensorRGBW);  % It would be nice to not have to run the whole thing
+    ip = ipSet(ip,'transform method','adaptive');
+    ip = ipSet(ip,'demosaic method','bilinear');
+    illE = sceneGet(scene,'illuminant energy');
+    ip = ipSet(ip,'render whitept',illE, sensorRGBW);
+    ip = ipCompute(ip,sensorRGBW);
+    ip = ipSet(ip,'name',sprintf('RGBW-%.3f',expDuration(dd)));
+    ipWindow(ip);
+end
 
 %%
