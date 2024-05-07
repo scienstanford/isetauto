@@ -31,7 +31,7 @@ lgt = {'headlights','streetlights','otherlights','skymap'};
 destPath = fullfile(iaRootPath,'local',imageID);
 
 %% Download the four light group EXR files and make them into scenes
-
+%{
 if ~exist(destPath,'dir'), mkdir(destPath); end
 
 % First the metadata
@@ -47,6 +47,7 @@ for ll = 1:numel(lgt)
     destFile = fullfile(destPath,thisFile);
     ieSCP(user,host,srcFile,destFile);
 end
+%}
 
 %% Load up the scenes from the downloaded directory
 
@@ -139,7 +140,7 @@ oi = oiSet(oi,'gamma',1);
 
 %%  Create the ip and the default ISETAuto sensor
 
-[ip, sensor] = piRadiance2RGB(oi,'etime',1/30,'analoggain',1/10);
+[ip, sensor] = piRadiance2RGB(oi,'etime',1/30,'analoggain',1/10,'quantization','12bit');
 ipWindow(ip);
 
 %% Turn off the noise and recompute
