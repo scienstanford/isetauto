@@ -27,18 +27,20 @@ analogGain = 10; % off of native ISO
 
 if isequal(scene.type, 'opticalimage')
     shutterspeed = scenario.stepTime;
-    ip = piRadiance2RGB(scene,'etime',shutterspeed,'sensor',useSensor);
+    %ip = piRadiance2RGB(scene,'etime',shutterspeed,'sensor',useSensor);
+    rgb = oiShowImage(scene,-3);
 else
-    ip = piRadiance2RGB(scene,'etime',shutterspeed,'sensor',useSensor, ...
-        'fNumber', fNumber, 'analoggain', analogGain);
+    %ip = piRadiance2RGB(scene,'etime',shutterspeed,'sensor',useSensor, ...
+    %    'fNumber', fNumber, 'analoggain', analogGain);
+    rgb = sceneShowImage(scene, -3);
 end
 % Experiment with denoising after image capture
 if isequal(scenario.deNoise, 'rgb')
-    ip = piRGBDenoise(ip);
+    rgb = piRGBDenoise(rgb);
 end
 
 % Detect object classes that our detector is trained on
-rgb = ipGet(ip, 'srgb');
+%rgb = ipGet(ip, 'srgb');
 [bboxes,scores,labels] = detect(yDetect,rgb);
 
 % See if we have found a person (e.g. pedestrian)
