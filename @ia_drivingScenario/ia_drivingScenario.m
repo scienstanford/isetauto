@@ -18,7 +18,7 @@ classdef ia_drivingScenario < drivingScenario
         % that Matlab does set, as needed
         lighting = 'nighttime'; % skymap, if any
         headlampType = 'low beam'; % also 'low beam', 'high beam', 'level beam'
-        useLightGroups = true; % render each set of lights separately
+        useLightGroups = false; % render each set of lights separately
 
         % Only used when we are doing object detection
         % This has to match the name in the DSD scene
@@ -33,9 +33,9 @@ classdef ia_drivingScenario < drivingScenario
         % fps of resulting video
         frameRate = 5; %  speed in frames per second
 
-        % useObjectDetection
-        % TRUE for AEB cases, false if we just want images
-        useObjectDetection = false;
+        % set to true if we only want scenes
+        scenesOnly = false;
+
         % True if we want to preserve the Scene/OI data
         writeSceneFiles = true;
         sceneFileDir = ''; % gets set to local/scenename

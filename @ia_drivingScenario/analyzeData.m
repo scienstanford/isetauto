@@ -22,7 +22,7 @@ textPedPlot = {};
 stoppedPlot = [];
 
 %% Calculate distance to target if we are doing object detection
-if obj.useObjectDetection
+if ~obj.scenesOnly
 
 ourData = obj.logData;
 simulationTime = [];
@@ -72,7 +72,7 @@ if numel(obj.ourVideo) > 1
 end
 
 %% Show basic statistics and plot of speed vs. distance
-if obj.useObjectDetection
+if ~obj.scenesOnly
     figStats = figure( 'NumberTitle','off','Name',['PAEB with Headlight: ', obj.headlampType, ', Initial Speed: ', num2str(obj.initialSpeed), ' m/s']);
 
     xlim([0,obj.StopTime]);

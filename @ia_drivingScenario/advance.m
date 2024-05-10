@@ -65,8 +65,11 @@ if scenario.justStarting ~= true && scenario.dataOnly == false
         end
 
         % Create an image with a camera, and run a detector on it
-        [image, crashed] = scenario.imageAndDetect(scene);
-
+        if ~scenario.scenesOnly
+            [image, crashed] = scenario.imageAndDetect(scene);
+        else
+            image = sceneShowImage(scene, -3);
+        end
         % Here we want to create a movie/video
         addToVideo(scenario, scene, image, crashed);
 
