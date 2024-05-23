@@ -22,7 +22,7 @@ user = 'wandell';
 host = 'orange.stanford.edu';
 
 % Prepare the local directory
-imageID = '1113040557';
+imageID = '1112220258';
 % 1114034742 - Motorcyle, people walking not very nice
 % 1114091636 - People on street
 % 1114011756 - Vans moving away, person
@@ -31,7 +31,8 @@ imageID = '1113040557';
 % 1113042919 - Blue car, person, motorcyle, yellow bus
 % 1112213036 - Lousy.
 % 1113040557 - Lousy.  Truck and people
-
+% 1113051533 - Hard to get light levels right
+% 1112220258
 lgt = {'headlights','streetlights','otherlights','skymap'};
 destPath = fullfile(iaRootPath,'local',imageID);
 
@@ -99,14 +100,15 @@ sceneWindow(scene);
 
 %%  Combine them into a merged radiance scene
 % head, street, other, sky
-% wgts = [0.1, 0.1, 0.02, 0.001]; % night
-wgts = [0.02, 0.1, 0.02, 0.00001]; % night
+wgts = [0.01, 0.1, 0.02, 0.1]; % night
+% wgts = [0.02, 0.1, 0.02, 0.00001]; % night
 scene = sceneAdd(scenes, wgts);
 scene.metadata.wgts = wgts;
+scene = sceneSet(scene,'name',['Ford ',imageID]);
+sceneWindow(scene);
 
 %% Denoise and show
 scene = piAIdenoise(scene);
-sceneWindow(scene);
 
 scene = sceneSet(scene,'render flag','hdr');
 scene = sceneSet(scene,'gamma',1);
@@ -115,7 +117,17 @@ scene = sceneSet(scene,'gamma',1);
  lum = sceneGet(scene,'luminance');
  ieNewGraphWin; mesh(log10(lum));
 %}
+%{
+oi = oiCompute(oi,scene,'crop',true); oiWindow(oi);
 
+sensor = sensorCreate('imx363');
+sensor = sensorSet(sensor,'match oi',oi);
+sensor = sensorSet(sensor,'noise flag',0);
+sensor = sensorCompute(sensor,oi);
+
+ip = ipCreate; ip = ipCompute(ip,sensor);
+ipWindow(ip);
+%}
 %% If you want, crop out the headlight region of the scene for testing
 %
 % You can do this in the window, get the scene, and find the crop
