@@ -22,10 +22,15 @@ user = 'wandell';
 host = 'orange.stanford.edu';
 
 % Prepare the local directory
-imageID = '1114011756';
+imageID = '1113040557';
+% 1114034742 - Motorcyle, people walking not very nice
 % 1114091636 - People on street
 % 1114011756 - Vans moving away, person
-% 1113094429
+% 1113094429 - Truck and nice late afternoon
+% 1112201236 - Open highway scene
+% 1113042919 - Blue car, person, motorcyle, yellow bus
+% 1112213036 - Lousy.
+% 1113040557 - Lousy.  Truck and people
 
 lgt = {'headlights','streetlights','otherlights','skymap'};
 destPath = fullfile(iaRootPath,'local',imageID);
@@ -81,6 +86,16 @@ scene.metadata.wgts = wgts;
 scene = piAIdenoise(scene);
 sceneWindow(scene);
 %}
+
+%% Just the skymap
+%{
+wgts = [0 0 0 1];
+scene = sceneAdd(scenes, wgts);
+scene.metadata.wgts = wgts;
+scene = piAIdenoise(scene);
+sceneWindow(scene);
+%}
+
 
 %%  Combine them into a merged radiance scene
 % head, street, other, sky
