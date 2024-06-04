@@ -11,6 +11,7 @@
 %   metaFolder = '/acorn/data/iset/isetauto/Ford/SceneMetadata';
 %
 % See also
+%    s_downloadLightGroups (isethdrsensor)
 
 %%
 ieInit;
