@@ -18,9 +18,8 @@ roadData.recipe.set('outputfile',fullfile(piDirGet('local'),sceneName,[sceneName
 %% If we want to write out OI files we need
 %  a camera with lens
 if obj.writeSceneFiles
-    lensname    = 'dgauss.22deg.12.5mm.json';
-    doubleGauss = piCameraCreate('omni','lens file',lensname);
-    roadData.recipe.set('camera',doubleGauss);
+    carCamera = piCameraCreate('omni','lens file',obj.lensFile);
+    roadData.recipe.set('camera',carCamera);
     obj.sceneFileDir = fullfile(piDirGet('local'),sceneName);
 end
 
