@@ -28,7 +28,7 @@ classdef ia_drivingScenario < drivingScenario
         % These can be be over-ridden in the run-time function
         stepTime = .2; % time (s) per image frame/step
         scenarioQuality = 'quick'; % quick for testing, HD for quality, paper for publishing, etc. 
-        scenarioLength = 5; % in seconds
+        scenarioLength = 2; % in seconds
         
         % fps of resulting video
         frameRate = 5; %  speed in frames per second
@@ -37,7 +37,7 @@ classdef ia_drivingScenario < drivingScenario
         scenesOnly = false;
 
         % True if we want to preserve the Scene/OI data
-        writeSceneFiles = true;
+        writeSceneFiles = false;
         sceneFileDir = ''; % gets set to local/scenename
 
         % Object detector confidence threshold before we take action

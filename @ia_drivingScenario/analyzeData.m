@@ -123,7 +123,7 @@ if ~obj.scenesOnly
 
     % We want xlabel to have multiple lines
     captionLine1 = sprintf('Start -- Speed: %2.1f (m) Distance: %2.1f (m)', obj.initialSpeed(),targetDistance(1));
-    captionLine2 = sprintf('Thresholds: %.2f, %.2f, Sensor: %s', obj.alertThreshold, oj.predictionThreshold ,obj.sensorModel);
+    captionLine2 = sprintf('Thresholds: %.2f, %.2f, Sensor: %s', obj.alertThreshold, obj.predictionThreshold ,obj.sensorModel);
     captionLine3 = 'Notations are confidence level & actions taken';
 
     xlabel({'Time (s)', '', captionLine1, captionLine2, captionLine3}, 'FontSize', 12);
