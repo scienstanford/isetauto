@@ -31,6 +31,8 @@ if ~isequal(aMove, [0 0 0])
         ourRecipe.hasActiveTransform = true;
         % We may need to clear existing motion first?!
         % ADD MOTION
+        piAssetMotionAdd(ourRecipe,assetBranchName, ...
+            'translation', aMove);
     end
 end
 %% SUPPORT FOR rotating assets to a new direction
