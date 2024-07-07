@@ -78,8 +78,11 @@ function [scenario, egoVehicle] = createDrivingScenario
 % createDrivingScenario Returns the drivingScenario defined in the Designer
 
 % Construct a drivingScenario object.
-scenario = ia_drivingScenario('StopTime', .1, ...
-    'SampleTime', 1/500); % 
+%scenario = ia_drivingScenario('StopTime', .1, ...
+%    'SampleTime', 1/500); 
+% Slower settings for debugging
+scenario = ia_drivingScenario('StopTime', 1, ...
+    'SampleTime', 1/10); 
 
 % for this use case we only want the scene radiance
 % possibly by light group

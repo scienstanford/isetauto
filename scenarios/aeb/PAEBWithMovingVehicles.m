@@ -78,8 +78,11 @@ function [scenario, egoVehicle] = createDrivingScenario
 % createDrivingScenario Returns the drivingScenario defined in the Designer
 
 % Construct a drivingScenario object.
+%scenario = ia_drivingScenario('StopTime', .1, ...
+%    'SampleTime', 1/500); % 
+% more granular for debugging
 scenario = ia_drivingScenario('StopTime', .1, ...
-    'SampleTime', 1/500); % 
+    'SampleTime', 1/10); % 
 
 % Add all road segments
 roadCenters = [-119.91220007542 0.28026685394776 0;
