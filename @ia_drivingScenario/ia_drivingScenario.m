@@ -145,7 +145,7 @@ classdef ia_drivingScenario < drivingScenario
             ds = ds@drivingScenario(varargin{:});
 
             % Customize some parameters
-            ds.scenarioName = ['PAEB-' ds.headlampType]; % default
+            ds.scenarioName = ['HS-' ds.headlampType]; % default
             ds.StopTime = ds.scenarioLength; % Tests start 4s away, but can take longer as we brake
 
             if ~ds.dataOnly
