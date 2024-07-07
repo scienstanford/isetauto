@@ -83,8 +83,7 @@ function [scenario, egoVehicle] = createDrivingScenario
 % more granular for debugging
 scenario = ia_drivingScenario('StopTime', .5, ...
     'SampleTime', 1/10); % 
-%This doesn't seem to work right?
-%scenario.scenesOnly = true; % turn off detection and AEB
+scenario.scenesOnly = true; % turn off detection and AEB
 
 % Add all road segments
 roadCenters = [-119.91220007542 0.28026685394776 0;

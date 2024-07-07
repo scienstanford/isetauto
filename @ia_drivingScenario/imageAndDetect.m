@@ -9,9 +9,9 @@ persistent yDetect; % Our (YOLO) detector
 persistent detectionThreshold; % for declaring a match
 
 % Not sure if alerts should be "1-way" and stay on once turned on
-persistent alertThreshold; 
+persistent alertThreshold;
 
-if isempty(yDetect)
+if ~scenario.scenesOnly && isempty(yDetect)
     yDetect = yolov4ObjectDetector("csp-darknet53-coco");
     detectionThreshold = scenario.predictionThreshold; % How confident do we need to be
     alertThreshold = scenario.alertThreshold; % How confident do we need to be
@@ -39,80 +39,86 @@ if isequal(scenario.deNoise, 'rgb')
     rgb = piRGBDenoise(rgb);
 end
 
-% Detect object classes that our detector is trained on
-%rgb = ipGet(ip, 'srgb');
-[bboxes,scores,labels] = detect(yDetect,rgb);
+if ~scenario.scenesOnly
+    % Detect object classes that our detector is trained on
+    %rgb = ipGet(ip, 'srgb');
+    [bboxes,scores,labels] = detect(yDetect,rgb);
 
-% See if we have found a person (e.g. pedestrian)
-% NOTE: We don't (yet) distinguish between multiple pedestrians
-peds = ismember(labels,'person'); % Any person?
+    % See if we have found a person (e.g. pedestrian)
+    % NOTE: We don't (yet) distinguish between multiple pedestrians
+    peds = ismember(labels,'person'); % Any person?
 
-% Log our confidence
-scenario.confidencePed = max(scores(peds));
+    % Log our confidence
+    scenario.confidencePed = max(scores(peds));
 
-% If we have found a pedestrian set the flag, but don't unset it
-if ~isempty(peds) 
-    % Currently only turn these on, not off
-    if isempty(scenario.foundPed) || scenario.foundPed == false
-        scenario.foundPed = max(scores(peds)) > detectionThreshold; 
+    % If we have found a pedestrian set the flag, but don't unset it
+    if ~isempty(peds)
+        % Currently only turn these on, not off
+        if isempty(scenario.foundPed) || scenario.foundPed == false
+            scenario.foundPed = max(scores(peds)) > detectionThreshold;
+        end
+        if isempty(scenario.warnPed) || scenario.warnPed == false
+            scenario.warnPed = max(scores(peds)) > alertThreshold;
+        end
     end
-    if isempty(scenario.warnPed) || scenario.warnPed == false
-        scenario.warnPed = max(scores(peds)) > alertThreshold;
+
+    % If we are confident we have identified a pedestrian, begin braking
+    % Right now we don't do motion estimation, or determine if the pedestrian
+    % is in the road.
+    if scenario.foundPed
+        cprintf('*Red', 'Identified Pedestrian...\n');
+        scenario.roadData.actorsIA{scenario.roadData.targetVehicleNumber}.braking = true;
     end
-end
 
-% If we are confident we have identified a pedestrian, begin braking
-% Right now we don't do motion estimation, or determine if the pedestrian
-% is in the road.
-if scenario.foundPed
-    cprintf('*Red', 'Identified Pedestrian...\n');
-    scenario.roadData.actorsIA{scenario.roadData.targetVehicleNumber}.braking = true;
-end
+    % This lower threshold is where we take less aggressive actions, such as
+    % turning on the high beam on the side with the pedestrian
+    if scenario.warnPed
+        cprintf('*Blue', 'Suspect Pedestrian...\n');
+    end
 
-% This lower threshold is where we take less aggressive actions, such as
-% turning on the high beam on the side with the pedestrian
-if scenario.warnPed
-    cprintf('*Blue', 'Suspect Pedestrian...\n');
-end
+    % Should have both label & score here:
+    rgb = insertObjectAnnotation(rgb,"rectangle",bboxes,labels, 'FontSize', 16);
 
-% Should have both label & score here:
-rgb = insertObjectAnnotation(rgb,"rectangle",bboxes,labels, 'FontSize', 16);
+    % Return detection results, along with other data
+    scenario.detectionResults.bboxes = bboxes;
+    scenario.detectionResults.scores = scores;
+    scenario.detectionResults.labels = labels;
 
-% Return detection results, along with other data
-scenario.detectionResults.bboxes = bboxes;
-scenario.detectionResults.scores = scores;
-scenario.detectionResults.labels = labels;
+    % Calculate distance to pedestrian.
+    pedMeters = scenario.targetDistance();
 
-% Calculate distance to pedestrian. 
-pedMeters = scenario.targetDistance();
+    % for debugging
+    fprintf('Car X: %2.1f, Car V: %2.1f\n',scenario.egoVehicle.Position(1), ...
+        scenario.egoVelocity(1));
 
-% for debugging
-fprintf('Car X: %2.1f, Car V: %2.1f\n',scenario.egoVehicle.Position(1), ...
-    scenario.egoVelocity(1));
+    caption = sprintf("Time: %2.1f Speed: %2.1f Dist: %2.1f", ...
+        scenario.SimulationTime, ...
+        scenario.egoVelocity(1), ...
+        pedMeters);
 
-caption = sprintf("Time: %2.1f Speed: %2.1f Dist: %2.1f", ...
-    scenario.SimulationTime, ...
-    scenario.egoVelocity(1), ...
-    pedMeters);
+    % check for being too close, or for perhaps even already hit the pedestrian
+    % we may not recognize the case where the ped is off to one side?
+    if scenario.egoVelocity(1) <= 0
+        caption = strcat(caption, " ***STOPPED*** ");
+        crashed = true; % should probably be renamed "endScenario"
+    elseif pedMeters <= .5
+        caption = strcat(caption, " ***CRASH*** ");
+        crashed = true;
+        scenario.crashed = true; % keep a global copy for plotting
+    end
 
-% check for being too close, or for perhaps even already hit the pedestrian
-% we may not recognize the case where the ped is off to one side?
-if scenario.egoVelocity(1) <= 0
-    caption = strcat(caption, " ***STOPPED*** ");
-    crashed = true; % should probably be renamed "endScenario"
-elseif pedMeters <= .5 
-    caption = strcat(caption, " ***CRASH*** ");
-    crashed = true;
-    scenario.crashed = true; % keep a global copy for plotting
-end
+    if scenario.foundPed % cheat & assume we are actor 1
+        image = insertText(rgb,[0 0],strcat(caption, " -- BRAKING"),'FontSize',24, 'TextColor','red');
+    elseif scenario.warnPed
+        image = insertText(rgb,[0 0],strcat(caption, " -- ALERT!"),'FontSize',24, 'TextColor','white');
+    else
+        image = insertText(rgb,[0 0],caption,'FontSize',24);
+    end
 
-if scenario.foundPed % cheat & assume we are actor 1
-    image = insertText(rgb,[0 0],strcat(caption, " -- BRAKING"),'FontSize',24, 'TextColor','red');
-elseif scenario.warnPed
-    image = insertText(rgb,[0 0],strcat(caption, " -- ALERT!"),'FontSize',24, 'TextColor','white');
+    % For just imaging, no detection
 else
-    image = insertText(rgb,[0 0],caption,'FontSize',24);
+    crashed = false;
+    image = rgb;
 end
-
 
 end

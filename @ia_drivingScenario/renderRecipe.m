@@ -49,14 +49,6 @@ function scene = renderRecipe(scenario, originalOutputFile)
         scenario.addSphere = false;
     end
 
-    if scenario.scenesOnly
-        % try using a perspective camera
-        val = piCameraCreate('pinhole'); 
-        ourRecipe.set('camera',val);
-        ourRecipe.camera.fov.value = 140; % hack? 
-        piWrite(ourRecipe); % update camera
-    end
-
     if isequal(scenario.deNoise, 'exr_all')
         scene = piRender(ourRecipe, 'do_denoise', 'exr_all', ...
             'mean luminance',-1);
