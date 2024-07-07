@@ -1,7 +1,11 @@
 function assetBranch = moveAsset(obj, scenario, actorDS)
-% Place an asset in a driving simulation
+% Move an asset in a driving simulation
+%
+% Currently uses Translate and Rotate
+% True object motion not supported yet
 %
 %   D.Cardinal, Stanford, May, 2023
+%
 %
 
 %% For Matlab scenes, we get a scenario along with our object
@@ -19,13 +23,27 @@ ourRecipe = scenario.roadData.recipe;
 % Time constant and coordinate reversal
 aVelocity = actorDS.Velocity .* [1 1 0]; % even though coordinates aren't all reversed, velocity is?
 aMove = aVelocity .* scenario.SampleTime;
-assetBranch = piAssetTranslate(ourRecipe,assetBranchName,aMove);
 
+if ~isequal(aMove, [0 0 0])
+    if ~scenario.useObjectMotion
+        assetBranch = piAssetTranslate(ourRecipe,assetBranchName,aMove);
+    else % use dynamic transforms
+        ourRecipe.hasActiveTransform = true;
+        % We may need to clear existing motion first?!
+        % ADD MOTION
+    end
+end
 %% SUPPORT FOR rotating assets to a new direction
 deltaYaw = obj.yaw - obj.savedYaw;
 if deltaYaw ~= 0
-    assetBranch = piAssetRotate(ourRecipe,assetBranchName,...
-        [0 0 deltaYaw]);
-    obj.savedYaw = obj.yaw;
+    if ~scenario.useObjectMotion
+        assetBranch = piAssetRotate(ourRecipe,assetBranchName,...
+            [0 0 deltaYaw]);
+        obj.savedYaw = obj.yaw;
+    else
+        ourRecipe.hasActiveTransform = true;
+
+        % USE MOTION
+    end
 end
 

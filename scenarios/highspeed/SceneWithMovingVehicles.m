@@ -84,6 +84,7 @@ function [scenario, egoVehicle] = createDrivingScenario
 scenario = ia_drivingScenario('StopTime', .5, ...
     'SampleTime', 1/10); % 
 scenario.scenesOnly = true; % turn off detection and AEB
+scenario.useObjectMotion = true; % set to use dynamic object motion
 
 % Add all road segments
 roadCenters = [-119.91220007542 0.28026685394776 0;

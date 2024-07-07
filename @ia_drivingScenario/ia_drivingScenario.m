@@ -36,6 +36,11 @@ classdef ia_drivingScenario < drivingScenario
         % set to true if we only want scenes
         scenesOnly = false;
 
+        % set to true if we want to enable active object motions
+        % NOTE: Currently this forces CPU rendering, so we
+        %       default to false, which gives us the "Clutch Cargo" look
+        useObjectMotion = false;
+
         % True if we want to preserve the Scene/OI data
         writeSceneFiles = false;
         sceneFileDir = ''; % gets set to local/scenename
