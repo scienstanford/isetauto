@@ -33,6 +33,7 @@ if ~isequal(aMove, [0 0 0])
         % ADD MOTION
         piAssetMotionAdd(ourRecipe,assetBranchName, ...
             'translation', aMove);
+        % see what it looks like in Geometry if we double
     end
 end
 %% SUPPORT FOR rotating assets to a new direction
@@ -46,6 +47,10 @@ if deltaYaw ~= 0
         ourRecipe.hasActiveTransform = true;
 
         % USE MOTION
+        piAssetMotionAdd(ourRecipe,assetBranchName, ...
+            'rotation', [0 0 deltaYaw]);
+        obj.savedYaw = obj.yaw;
+        
     end
 end
 

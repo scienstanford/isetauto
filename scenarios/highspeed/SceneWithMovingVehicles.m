@@ -82,9 +82,11 @@ function [scenario, egoVehicle] = createDrivingScenario
 %    'SampleTime', 1/500); % 
 % more granular for debugging
 scenario = ia_drivingScenario('StopTime', .5, ...
-    'SampleTime', 1/10); % 
+    'SampleTime', .1); % 
 scenario.scenesOnly = true; % turn off detection and AEB
-scenario.useObjectMotion = true; % set to use dynamic object motion
+
+%% For baseline validation turn this off
+scenario.useObjectMotion = false; % set to use dynamic object motion
 
 % Add all road segments
 roadCenters = [-119.91220007542 0.28026685394776 0;
