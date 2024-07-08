@@ -24,8 +24,10 @@ ourRecipe = scenario.roadData.recipe;
 aVelocity = actorDS.Velocity .* [1 1 0]; % even though coordinates aren't all reversed, velocity is?
 aMove = aVelocity .* scenario.SampleTime;
 
+%% NOTE: PBRT doesn't support animating lights (like headlights)
+%        So at least for now, we disable animation of vehicles
 if ~isequal(aMove, [0 0 0])
-    if ~scenario.useObjectMotion
+    if ~scenario.useObjectMotion || isequal(class(actorDS),'driving.scenario.Vehicle')
         assetBranch = piAssetTranslate(ourRecipe,assetBranchName,aMove);
     else % use dynamic transforms
         ourRecipe.hasActiveTransform = true;
@@ -39,7 +41,7 @@ end
 %% SUPPORT FOR rotating assets to a new direction
 deltaYaw = obj.yaw - obj.savedYaw;
 if deltaYaw ~= 0
-    if ~scenario.useObjectMotion
+    if ~scenario.useObjectMotion|| isequal(class(actorDS),'driving.scenario.Vehicle')
         assetBranch = piAssetRotate(ourRecipe,assetBranchName,...
             [0 0 deltaYaw]);
         obj.savedYaw = obj.yaw;

@@ -12,12 +12,12 @@ if ~isempty(p.Results.preset)
     switch p.Results.preset
         case 'dirty'
             recipe.set('film resolution',[640 360]); % Divide by 4 for speed
-            recipe.set('pixel samples',64);            % 256 for speed
+            recipe.set('pixel samples',64);            % power of 4
             recipe.set('max depth',3);                  % Number of bounces
             recipe.set('sampler subtype','pmj02bn');
         case 'quick'
             recipe.set('film resolution',[1920 1080]/2); % Divide by 4 for speed
-            recipe.set('pixel samples',128);            % 256 for speed
+            recipe.set('pixel samples',256);            % 256 for power of 4
             recipe.set('max depth',3);                  % Number of bounces
             recipe.set('sampler subtype','pmj02bn');
         case 'quick-rays'

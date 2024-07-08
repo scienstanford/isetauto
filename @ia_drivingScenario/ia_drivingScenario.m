@@ -104,6 +104,7 @@ classdef ia_drivingScenario < drivingScenario
         confidencePed = 0; % chance we have a pedestrian in view
         crashed = false; % set if crashed
         scenarioName = ''; % set in creation function
+        dockerInUse = []; % allow switch from gpu to cpu & back
 
         % Initialize data logging structure and frame count
         frameNum = 1; % to start
