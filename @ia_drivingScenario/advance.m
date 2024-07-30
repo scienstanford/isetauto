@@ -204,6 +204,9 @@ for ii = 1:numel(scenario.roadData.actorsIA)
 
     % Also move our Actors by time step * velocity
     % move asset per velocity inherited from DS
+
+    % NOTE: We may need to have a rotation to get the correct .pbrt
+    currentActor.Yaw = currentActor.Yaw + 1;
     ourActor.yaw = currentActor.Yaw;
     ourActor.moveAsset(scenario, ...
         currentActor);

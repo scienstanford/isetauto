@@ -31,11 +31,12 @@ if ~isequal(aMove, [0 0 0])
         assetBranch = piAssetTranslate(ourRecipe,assetBranchName,aMove);
     else % use dynamic transforms
         ourRecipe.hasActiveTransform = true;
-        % We may need to clear existing motion first?!
+        % We may need to clear existing motion first if using the broken
+        % version of iset3d (currently fix is in the dev-motion branch)
         % ADD MOTION
         piAssetMotionAdd(ourRecipe,assetBranchName, ...
             'translation', aMove);
-        % see what it looks like in Geometry if we double
+        % we probably also need a rotation for piWriteGeometry to work
     end
 end
 %% SUPPORT FOR rotating assets to a new direction

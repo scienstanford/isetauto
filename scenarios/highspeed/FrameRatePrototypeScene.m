@@ -82,7 +82,7 @@ function [scenario, egoVehicle] = createDrivingScenario
 %    'SampleTime', 1/500); 
 % Slower settings for debugging
 scenario = ia_drivingScenario('StopTime', 1, ...
-    'SampleTime', 1/10); 
+    'SampleTime', 1/100); 
 
 % for this use case we only want the scene radiance
 % possibly by light group
