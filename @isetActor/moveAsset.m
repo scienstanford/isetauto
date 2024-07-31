@@ -25,8 +25,11 @@ aVelocity = actorDS.Velocity .* [1 1 0]; % even though coordinates aren't all re
 aMove = aVelocity .* scenario.SampleTime;
 
 %% NOTE: PBRT doesn't support animating lights (like headlights)
-%        So at least for now, we disable animation of vehicles
+%        So at least for now, we disable animation of vehicles during
+%        frames
+needRotation = false;
 if ~isequal(aMove, [0 0 0])
+    needRotation = true; % pbrt needs rotation whenever we do translation
     if ~scenario.useObjectMotion || isequal(class(actorDS),'driving.scenario.Vehicle')
         assetBranch = piAssetTranslate(ourRecipe,assetBranchName,aMove);
     else % use dynamic transforms
@@ -55,5 +58,9 @@ if deltaYaw ~= 0
         obj.savedYaw = obj.yaw;
         
     end
+elseif needRotation == true
+    % Need to add a dummy rotation or translation won't work
+    piAssetMotionAdd(ourRecipe,assetBranchName, ...
+        'rotation', [ 0 0 0]);
 end
 
