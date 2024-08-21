@@ -1,5 +1,7 @@
 %% ISETAuto script
 %
+% NEEDS TO BE UPDATED WITH ISETHDRSENSOR METHODS
+%
 % Related to the Ford grant
 %
 % This script reads a group of simulated scenes from the data stored
