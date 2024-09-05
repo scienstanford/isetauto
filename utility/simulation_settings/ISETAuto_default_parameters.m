@@ -9,7 +9,7 @@ parameter.general.option          = 'all';% options include sumo/suso/all
 % Available sceneTypes: city1, city2, city3, city4, citymix, suburb
 parameter.scene.sceneType          = 'suburb';
 % To see the available roadTypes use iaRoadTypes
-parameter.scene.roadType           = 'city_cross_6lanes_001';
+parameter.scene.roadType           = 'city_cross_4lanes_002';
 parameter.scene.treeDensity        = 'random';
 parameter.scene.trafficflowDensity = 'low'; % Available trafficflowDensity: low, medium, high
 % Choose a timestamp(1~360), which is the moment in the SUMO

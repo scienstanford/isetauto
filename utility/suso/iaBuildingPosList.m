@@ -69,16 +69,26 @@ aveW = sum/length(buildingList)+10;
 % calculate the average width of all the buildings variable aveW can 
 % be used to delete unnecessary buildings in the scene
 
-assetList = sceneRecipe.get('asset list');
-
+% assetList = sceneRecipe.get('asset list');
+assetList = sceneRecipe.get('object names');
+assetIDs = sceneRecipe.get('object');
 for kk = 1:numel(assetList)
-    name = strsplit(assetList{kk}.name, '_');
-    if strcmp(name{2}, 'Plane') % if the object is a building region.
+    % name = strsplit(assetList{kk}, '_');
+    if contains(assetList{kk}, 'Plane') % if the object is a building region.
         count_before = count;
-        type = name{3};     % extract region information
-        lenx_tmp = assetList{kk}.size.l;
-        leny_tmp = assetList{kk}.size.w;
-        coordination = assetList{kk}.translation;
+        % get the size of the asset
+        thisAsset = sceneRecipe.get('asset parent',assetIDs(kk));
+        if contains(thisAsset.name,'Plane_front'),type = 'front';
+        elseif contains(thisAsset.name,'Plane_back'),type = 'back';
+        elseif contains(thisAsset.name,'Plane_left'),type = 'left';
+        elseif contains(thisAsset.name,'Plane_right'),type = 'right';
+        else
+            error('Road Asset Type does not exist');
+        end
+            
+        lenx_tmp = thisAsset.size.l;
+        leny_tmp = thisAsset.size.w;
+        coordination = thisAsset.translation;
         y_up = coordination(2);
         coordination = [coordination(1),coordination(3)];
         switch type
@@ -99,22 +109,6 @@ for kk = 1:numel(assetList)
         end
         [buildingPosList_tmp, count] = buildingPlan(building_list, ...
             lenx_tmp, leny_tmp, coordination, buildingPosList_tmp, count, type, ankor, aveW);
-        
-        % %% Delete unnecessary buildings from building list
-        % if initialStruct == 1   % if it's first time use struct, initial it
-        %     FieldName = fieldnames(buildingPosList_tmp)';
-        %     FieldName{2,1} = {};
-        %     buildingPosListDeleted = struct(FieldName{:});
-        %     initialStruct = 0;
-        % end
-        %     finalCount = count_before;
-        %     margin = 10;
-        %     for ll = count_before:count
-        %         if (abs(coordination(1)-buildingPosList_tmp(ll).position(1))<(lenx_tmp/margin))||(abs(coordination(2)-buildingPosList_tmp(ll).position(2))<(leny_tmp/margin))
-        %             buildingPosListDeleted(finalCount) = buildingPosList_tmp(ll);
-        %             finalCount = finalCount + 1;
-        %         end
-        %     end
         
         %% change the structure of the output data
         for jj = count_before:length(buildingPosList_tmp)

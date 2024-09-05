@@ -26,14 +26,26 @@ if ~piDockerExists, piDockerConfig; end
 %%  Example scene creation
 SceneParameter = ISETAuto_default_parameters;
 
+prefGroupName = 'ISETAuto';
+% rmpref(prefGroupName); % clean up
+setpref(prefGroupName, 'local', true);
+setpref(prefGroupName, 'assetdir', '/Volumes/SSDZhenyi/Ford Project/PBRT_assets');
 %% Initialize the recipe for the type of driving conditions
 %--------------------------------------------------------------------------
 % This takes around 150 seconds the first time.  If you run it
 % multiple times, it will be shorter. 
 %--------------------------------------------------------------------------
-tic
-[sceneR, sceneInfo] = iaSceneAuto(SceneParameter);
-toc
+sceneLists = {'city1','suburb','city2','city3','city4'};
+roadLists = {'city_cross_4lanes_002','city_cross_6lanes_001','curve_6lanes_001','straight_2lanes_parking'};
+for ss = 1:5
+    for rr = 1:4
+        SceneParameter.scene.sceneType = sceneLists{ss};
+        SceneParameter.scene.roadType = roadLists{rr};
+        tic
+        [sceneR, sceneInfo] = iaSceneAuto(SceneParameter);
+        toc
+    end
+end
 %% Assign predefined automotive related materials to the scene
 % assign
 iaAutoMaterialGroupAssign(sceneR);  

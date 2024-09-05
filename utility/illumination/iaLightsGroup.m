@@ -118,36 +118,40 @@ NodeList = thisR.assets.Node;
 
 for nn = nNodes:-1:1
     thisNode =  NodeList{nn};
-    if strcmp(thisNode.type,'light')
+    if ~ischar(thisNode) && strcmp(thisNode.type,'light')
         % It's a lot.  Delete it from all the recipes that are not of
         % the same type.  
         light = thisNode.name;
-        if ~contains(light, skymap)
-            SkylightFlag = true;
+        if ~contains(light, skymap) 
             % Not a skymap.  So delete it from this one.
             recipeSkymap.assets = recipeSkymap.assets.chop(nn); 
+        else
+            SkylightFlag = true;
         end
 
         if ~contains(light, {'headlight','headlamp'})
-            HeadlightFlag = true;
             % Not a headlight or headlamp.  Delete from this one.
             recipeHeadLights.assets = recipeHeadLights.assets.chop(nn); 
+        else
+            HeadlightFlag = true;
         end
 
         if ~contains(light, 'streetlight')
             % Not a Street light.  Delete from this one.
-            StreetlightFlag = true;
             recipeStreetLights.assets = recipeStreetLights.assets.chop(nn); 
+        else
+             StreetlightFlag = true;
         end
 
         if contains(light, {'headlamp','headlight'}) || ...
                 contains(light, skymap) || ...
-                contains(light, 'streetlight')
-            OtherlightFlag = true;
+                contains(light, 'streetlight') 
             % If it is a skymap, headlight, or a streetlight (possibly
             % mis-spelled), delete it from 'Other'.  If it is not one
             % of these, we will leave it.
             recipeOtherLights.assets = recipeOtherLights.assets.chop(nn);
+        else
+            OtherlightFlag = true;
         end
     end
 end

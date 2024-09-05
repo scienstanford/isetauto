@@ -39,7 +39,7 @@ for ii = 1:numel(assetNames)
                 rotationMatrix = piRotationMatrix('zrot', rad2deg(rotations(mm,1)));
             end
             namelist = [];
-            if contains(thisName,'biker') % deal with biker
+            if contains(thisName,'biker_') % deal with biker
                 namelist{1} = [thisName,'_person'];
                 namelist{2} = [thisName,'_', assetlibList(thisName).label];
             else

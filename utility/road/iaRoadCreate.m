@@ -9,7 +9,7 @@ function [road,assetRecipe] = iaRoadCreate(varargin)
 %  N/A
 % Key/value pairs
 %  roadtype - See piRoadTypes
-%  sceneType  
+%  sceneType
 %  trafficflowDensity - low or high
 %  sessions
 %  scitran
@@ -36,16 +36,13 @@ trafficflowDensity = p.Results.trafficflowDensity;
 roadtype        = p.Results.roadtype;
 st = p.Results.scitran;
 
-if isempty(st), st = scitran('stanfordlabs'); end
+if isempty(st) && ~getpref('ISETAuto','local'), st = scitran('stanfordlabs'); end
 
 %% generate road information
 iaRoadInfo;
 
 % load it
 load(fullfile(piRootPath,'local','configuration','roadInfo.mat'),'roadinfo');
-
-% Lookup the session with the road information
-roadSession = st.fw.lookup('wandell/Graphics auto/assets/road');
 %%
 vTypes={'pedestrian','passenger','bus','truck','bicycle'};
 
@@ -77,19 +74,27 @@ end
 
 %% Check the road type and download road assets
 
-Road_acq = roadSession.acquisitions.findOne(sprintf('label=%s',roadtype));
+if ispref('ISETAuto') && ~getpref('ISETAuto','local')
+    % Lookup the session with the road information
+    roadSession = st.fw.lookup('wandell/Graphics auto/assets/road');
 
-% This is the rendering recipe for the road session
-% fileType_json ='source code'; % json
-% recipeFiles = st.dataFileList(roadSession,fileType_json);
-% 
-% fileType = 'CG Resource';
-% [resourceFiles, resource_acqID] = st.dataFileList(roadSession, fileType);
+    Road_acq = roadSession.acquisitions.findOne(sprintf('label=%s',roadtype));
+    % get recipe
+    assetRecipe = piFWAssetCreate(Road_acq, 'resources', false);
+    %% include "others" data
+    % others data include basic data which will be used for rendering
+    % e.g. lens file, spd files
 
+    data_acq = st.fw.lookup('wandell/Graphics auto/assets/data/others');
+    thisResource = stFileSelect(Road_acq.files,'type','CG Resource');
+    road.fwList = [data_acq.id,' ','data.zip',' ',...
+        Road_acq.id,' ',...
+        thisResource{1}.name];
+else
+    tmp = load(fullfile(getpref('ISETAuto','assetdir'),'road/sumo',roadtype,[roadtype,'.recipe.mat']));
+    assetRecipe = tmp.thisR; clear tmp;
+end
 
-% thisRoad_randm = randi(length(thisRoad),1);
-% roadname_update = thisRoad(thisRoad_randm);
-% roadname_tmp = strsplit(roadname_update{1},'.');
 for ii = 1: length(roadinfo)
     if piContains(roadtype,'construct') % will change name from ***_construct_001 to ***_001_construct
         roadname=strrep(roadtype,'_construct','');
@@ -103,10 +108,7 @@ for ii = 1: length(roadinfo)
     end
 end
 
-% get recipe
-assetRecipe = piFWAssetCreate(Road_acq, 'resources', false);
-
-% Set the temporal sampling interval for the SUMO simulation.  
+% Set the temporal sampling interval for the SUMO simulation.
 switch trafficflowDensity
     case 'low'
         interval=interval*0.5;
@@ -114,19 +116,8 @@ switch trafficflowDensity
         interval=interval*1.5;
     otherwise
 end
-
 % Map key/value pairs
 road.vTypes=containers.Map(vTypes,interval);
-
-%% include "others" data
-% others data include basic data which will be used for rendering 
-% e.g. lens file, spd files
-
-data_acq = st.fw.lookup('wandell/Graphics auto/assets/data/others');
-thisResource = stFileSelect(Road_acq.files,'type','CG Resource');
-road.fwList = [data_acq.id,' ','data.zip',' ',...
-    Road_acq.id,' ',...
-    thisResource{1}.name];
 end
 
 

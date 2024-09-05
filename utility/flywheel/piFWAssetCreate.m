@@ -47,8 +47,13 @@ for ii = 1:length(acq.files)
 end
 
 % Read and convert the json recipe into a ISET3d recipe
-recipe = piJson2Recipe(recipe_path);
-
+if endsWith(recipe_path,'.mat')
+    tmp = load(recipe_path);
+    recipe = tmp.thisR;
+else
+    recipe = piJson2Recipe(recipe_path);
+end
+recipe.assets = recipe.assets.uniqueNames;
 %% Download CG Resource file
 dstFile = fullfile(dstDir, 'tmp.zip');
 for ii = 1:length(acq.files)

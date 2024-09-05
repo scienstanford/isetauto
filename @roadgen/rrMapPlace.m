@@ -342,7 +342,7 @@ end
     end
 
 % pick specified number of positions and rotations
-if points(1) > 0
+if size(points, 1) > 0
     randomIndices = randsample(size(points, 1), sumofpoints);
     points = points(randomIndices,:);
     rot = rot(randomIndices,:);

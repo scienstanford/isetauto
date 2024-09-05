@@ -41,7 +41,7 @@ nassets          = p.Results.nassets;
 if nassets == 0, assetlist=[];return; end
 
 %% Find all the acuisitions
-session = st.lookup(sprintf('wandell/Graphics auto/assets/%s', sessionname), true);
+session = st.lookup(sprintf('wandell/Graphics auto v4/assets/%s', sessionname), true);
 acqs    = session.acquisitions();
 
 %%
@@ -77,9 +77,11 @@ if isempty(acquisitionname)
         assetlist(ii).name               = acqLabel;
         assetlist(ii).recipe             = thisR;
         assetName                        = getAssetName(thisR);
-        assetlist(ii).size               = thisR.get('assets',assetName,'size');
-        assetlist(ii).position           = thisR.get('assets',assetName,'world position');
-        assetlist(ii).rotation           = thisR.get('assets',assetName,'world rotationmatrix');
+        assetID = piAssetFind(thisR,'name', assetName);
+        assetlist(ii).size               = thisR.assets.Node{assetID}.size;
+        
+        assetlist(ii).position           = thisR.assets.Node{assetID}.translation;
+        assetlist(ii).rotation           = thisR.assets.Node{assetID}.rotation;
         assetlist(ii).fwInfo             = [acqId,' ',resourcesName];
         assetlist(ii).count              = downloadList(ii).count; % how many times this asset are instantiated.
     end

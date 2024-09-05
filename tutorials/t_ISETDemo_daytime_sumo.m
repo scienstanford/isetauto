@@ -1,4 +1,4 @@
-%% Automatically assemble a country road scene
+%% Automatically assemble a daytime city road scene
 %
 % Dependencies
 %   ISET3d, ISETAuto, ISETonline, and ISETCam
@@ -16,81 +16,61 @@
 %
 %   ISETOnline:  Looks up the road data using the database.
 %
-% Zhenyi, 2022
+% Zhenyi, 2024
 
 %% Initialize ISET and Docker
-ieInit;
+ieInit; clear all
 if ~piDockerExists, piDockerConfig; end
 
 %% (Optional) isetdb() setup
 % setup stanford server (n.b. ideally in user startup file)
-setpref('db','server','acorn.stanford.edu'); 
-setpref('db','port',49153);
+% setpref('db','server','acorn.stanford.edu'); 
+% setpref('db','port',49153);
+% 
+% % Opens a connection to the server
+% sceneDB = isetdb();
+scenetype = 'city2';
+roadtype = 'city_cross_4lanes_002';
 
-% Opens a connection to the server
-sceneDB = isetdb();
+SceneParameter = ISETAuto_default_parameters;
+SceneParameter.scene.sceneType = scenetype;
+SceneParameter.scene.roadType = roadtype;
 
-% If fullpath to the asset is not given, we will find it in our database
-% We have quite a few generated roads. Currently they are usually 400m long
-road_name  = 'road_020';
+tic
+[sceneR, sceneInfo] = iaSceneAuto(SceneParameter);
+toc
 
-% Create the road data object that we will populate with vehicles
-% and other objects for eventual assembly into our scene
-assetDir = '/Volumes/SSDZhenyi/Ford Project/PBRT_assets';
-roadData = roadgen('road directory',road_name, 'asset directory', assetDir);
+assetDir = '/Volumes/SSDZhenyi/Ford Project/PBRT_assets';addpath(genpath(assetDir));
+tmp = load(fullfile(assetDir,'road','sumo',roadtype,[roadtype,'.recipe.mat']));
+roadRecipe = tmp.thisR;
 
-%% First we place the elements that are on the road (onroad)
+roadData = roadgen('road directory',[scenetype,'_',roadtype],...
+    'road recipe',roadRecipe,...
+    'asset directory', assetDir);
 
-% The driving lane(s)
-roadData.set('onroad car lanes',{'leftdriving','rightdriving'});
-% roadData.set('onroad car lanes', {'leftdriving'});
-
-% Types of cars we'll place on the road in our scene
-% These are just a few that have been chosen for this demo script
-% car_001 is a white MB Sedan
-% car_002 is a white VW Golf or similar
-% car_003 is a red Audi hatchback
-% car_058 is a silver/gray Ford F150
 roadData.set('onroad car names',{'car_001','car_002','car_003','car_058'});% 
 
-%% Set how many cars we'll place in each driving lane.
-% The vector length of these numbers should be the same as the number
-% of driving lanes; e.g. [10, 10] is 10 cars in each of 2 lanes
-% (Some may overlap, so the final scene may have less)
-nCars = [10, 10];
-roadData.set('onroad n cars', nCars);
-
-%% Now place the animals that are on the road
-% We have multiple different animal objects, but just use one type in this demo
-roadData.set('onroad animal names',{'deer_001'});
-roadData.set('onroad n animals', [3, 3]);
-roadData.set('onroad animal lane',{'leftdriving','rightdriving'});
-
-%% Place the offroad elements.  These are only animals and trees.  Not cars.
-% In this demo we only use 3 types of trees from our library
 roadData.set('offroad tree names', {'tree_001','tree_002','tree_003'});
-roadData.set('offroad n trees', [50, 1, 1]); % [50, 100, 150]
-roadData.set('offroad tree lane', {'rightshoulder','leftshoulder'});
+
+roadData.set('offroad n trees', [50, 1, 1]);
 
 % the roadData object comes with a base ISET3d recipe for rendering
 thisR = roadData.recipe;
 
-%% We want to write out the final recipe in local for rendering by PBRT
-% Our convention is <iaRootDir>/local/<scenename>/<scenename.pbrt>
-% even though road scenes in /data are have two levels of nesting
-thisR.set('outputfile',fullfile(piDirGet('local'),num2str(iaImageID),[num2str(iaImageID),'.pbrt']));
-
-%% Set up the rendering skymap -- this is just one of many available
-skymapName = 'sky-noon_009.exr'; % Most skymaps are in the Matlab path already
-thisR.set('skymap',skymapName);
-
-% Since we are starting with daytime, dim the Sun to simulate a night scene
-% by finding it''s node in our asset tree and setting its spectrum scale
-skymapNode = strrep(skymapName, '.exr','_L');
-thisR.set('light',skymapNode, 'specscale', 0.001);
+thisR.set('outputfile',fullfile(piDirGet('local'),'daytime_demo/daytime_demo.pbrt'));
 
 %% Now we can assemble the scene using ISET3d methods
 assemble_tic = tic(); % to time scene assembly
+% remove bikerack
+roadData.road.scene.susoplaced = rmfield(roadData.road.scene.susoplaced,'bikerack');
+roadData.road.scene.timestamp = 80;
+
+% fieldnames(roadData.road.scene.susoplaced)
+% susoplaced = roadData.road.scene.susoplaced;
+% roadData.road.scene.susoplaced = [];
+% % Debug
+% roadData.road.scene.susoplaced.building = susoplaced.building;
+
 roadData.assemble();
 fprintf('---> Scene assembled in %.f seconds.\n',toc(assemble_tic));
 
@@ -119,11 +99,11 @@ thisR.set('film render type',{'radiance','depth'});
 
 % Set the render quality parameters
 % For publication 1080p by as many as 4096 rays per pixel are used
-thisR.set('film resolution',[1920 1080]/1.5); % Divide by 4 for speed
-thisR.set('pixel samples',128);            % 256 for speed
+thisR.set('film resolution',[1920 1080]/2); % Divide by 4 for speed
+thisR.set('pixel samples',64);            % 256 for speed
 thisR.set('max depth',5);                  % Number of bounces
 thisR.set('sampler subtype','pmj02bn');    
-thisR.set('fov',45);                       % Field of View
+thisR.set('fov',60);                       % Field of View
 
 %% For camera placement simulation we want a specific model of car
 %  so that we know the actual dimensions
@@ -131,20 +111,42 @@ thisR.set('fov',45);                       % Field of View
 % In this case we look for a Ford F150 (car_058) in the scene
 % NOTE: If there is no F150, you may need to generate a new scene
 branchID = roadData.cameraSet('camera type', camera_type,...
-                                'car name','car_058'); 
+                                'car name','car_001'); 
 
+% Set up the rendering skymap -- this is just one of many available
+skymapPath = '/Users/zhenyi/git_repo/dev/iset3d/data/skymaps/sky-noon_009.exr'; % Most skymaps are in the Matlab path already
+thisR.set('skymap',skymapPath);
+
+% skymapName = fileparts(skymapPath);
+% skymapNode = strrep(fileparts(skymapName), '.exr','_L');
+
+thisR.set('light','sky-noon_009', 'specscale', 0.001);
 %% Render the scene, and maybe an OI (Optical Image through the lens)
 % thisR.set('object distance', 0.95);
-scene = piWRS(thisR,'render flag','hdr');
+% scene = piWRS(thisR,'render flag','hdr');
+
 % piWrite(thisR);
-% scene = piRender(thisR);
+% 
+% scene = piRender(thisR, 'docker',isetdocker);
 % sceneWindow(scene);
+
+recipeList = iaLightsGroup(thisR, 'sky-noon_009');
+recipeList{1}.lookAt.from = [10 50 120];
+recipeList{1}.lookAt.to = [-20 1.5 120];
+recipeList{1}.lookAt.up = [0 1 0];
+recipeList{1}.lights = [];
+piWrite(recipeList{1});
+
+% setpref('ISETDocker','device','gpu');
+scene = piRender(recipeList{1}, 'docker',isetdocker);
+sceneWindow(scene);
+
+
 
 %% Process the scene through a sensor to the ip 
 %
 % This isn't great because the sensor is not explicit.
-scene = piAIdenoise(scene);
-ip = piRadiance2RGB(scene,'etime',1/100,'analoggain',1);
+ip = piRadiance2RGB(scene,'etime',1/300,'analoggain',1/5);
 
 rgb = ipGet(ip, 'srgb');
 ieNewGraphWin;

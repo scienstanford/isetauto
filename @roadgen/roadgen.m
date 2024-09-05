@@ -61,6 +61,7 @@ classdef roadgen < matlab.mixin.Copyable
             p = inputParser;
             p.addParameter('roaddirectory','');
             p.addParameter('assetdirectory',fullfile(iaFileDataRoot,'PBRT_assets'));
+            p.addParameter('roadrecipe','');
             %             p.addParameter('lane','');
             %             p.addParameter('pos','');
             %             p.addParameter('pointnum',0);
@@ -71,50 +72,62 @@ classdef roadgen < matlab.mixin.Copyable
 
             % Assets for this project.  Will generalize later.
             obj.assetdirectory = p.Results.assetdirectory;
-           
-            % Road runner data information
-            rrMapPath = p.Results.roaddirectory;
-            roadName = rrMapPath; % not sure this always works
-            
-            if ~exist(rrMapPath, 'dir')
-                
-                % If fullpath to the road "meta-scene" is not given, 
-                % we will find it in our database or our path
-                roadInfo = obj.assetdirectory.docFind('assetsPBRT', ...
-                    sprintf("{""name"": ""%s""}", rrMapPath));
-                if ~isempty(roadInfo) && isfolder(roadInfo.folder)
-                    rrMapPath = roadInfo.folder;
-                else % we don't have the db folder so check locally
-                    possiblePath = fullfile(iaRootPath, 'data', 'scenes', 'road', rrMapPath);
-                    if isfolder(possiblePath)
-                        rrMapPath = possiblePath;
-                    else
-                        error('Road Directory can not be located.');
-                    end                    
+            if isempty(p.Results.roadrecipe)
+                % Road runner data information
+                rrMapPath = p.Results.roaddirectory;
+                roadName = rrMapPath; % not sure this always works
+
+                if ~exist(rrMapPath, 'dir')
+
+                    % If fullpath to the road "meta-scene" is not given,
+                    % we will find it in our database or our path
+                    roadInfo = obj.assetdirectory.docFind('assetsPBRT', ...
+                        sprintf("{""name"": ""%s""}", rrMapPath));
+                    if ~isempty(roadInfo) && isfolder(roadInfo.folder)
+                        rrMapPath = roadInfo.folder;
+                    else % we don't have the db folder so check locally
+                        possiblePath = fullfile(iaRootPath, 'data', 'scenes', 'road', rrMapPath);
+                        if isfolder(possiblePath)
+                            rrMapPath = possiblePath;
+                        else
+                            error('Road Directory can not be located.');
+                        end
+                    end
                 end
-            end
 
-            % read road runner map
-            obj = rrMapRead(obj, rrMapPath);
-            
-            [~,roadName] = fileparts(rrMapPath);
-            obj.sceneName = roadName;
-            % create recipe
-            % The code currently can optionally use the .pbrt file
-            % or a .mat file that already has the asset's @recipe object
-            rrMapDir = fileparts(which(rrMapPath));
-            pbrtFile = fullfile(rrMapDir,roadName,[roadName,'.pbrt']);
-            recipeMat = fullfile(rrMapDir,[roadName,'.mat']);
+                % read road runner map
+                obj = rrMapRead(obj, rrMapPath);
 
-            % I don't think we want the .mat file, since it doesn't
-            % have all the pbrt goodies??
+                [~,roadName] = fileparts(rrMapPath);
+                obj.sceneName = roadName;
+                % create recipe
+                % The code currently can optionally use the .pbrt file
+                % or a .mat file that already has the asset's @recipe object
+                rrMapDir = fileparts(which(rrMapPath));
+                pbrtFile = fullfile(rrMapDir,roadName,[roadName,'.pbrt']);
+                recipeMat = fullfile(rrMapDir,[roadName,'.mat']);
 
-            %if exist(recipeMat, "file")
-            %    roadRecipe = load(recipeMat);
-            %    obj.recipe = roadRecipe.recipe;
-            %else
+                % I don't think we want the .mat file, since it doesn't
+                % have all the pbrt goodies??
+
+                %if exist(recipeMat, "file")
+                %    roadRecipe = load(recipeMat);
+                %    obj.recipe = roadRecipe.recipe;
+                %else
                 obj.recipe = piRead(pbrtFile);
-            %end
+                %end
+            else
+                obj.sceneName = p.Results.roaddirectory;
+                obj.recipe = p.Results.roadrecipe;
+                susoMatFile = fullfile(iaRootPath,'data/suso',[p.Results.roaddirectory,'.mat']);
+                if exist(susoMatFile,'file')
+                    tmp = load(susoMatFile);
+                    obj.road = tmp.parameter;
+                else
+                    obj.road = ISETAuto_default_parameters;
+                end
+                obj.assetdirectory = p.Results.assetdirectory;
+            end
         end
 
         %% Work in progress

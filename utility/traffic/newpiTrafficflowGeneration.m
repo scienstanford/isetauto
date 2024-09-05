@@ -46,7 +46,7 @@ function trafficflow=newpiTrafficflowGeneration(road,varargin)
 if ismac
     setenv('SUMO_HOME','/opt/homebrew/share/sumo');
     sumohome = getenv('SUMO_HOME');
-    setenv('PATH','/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/zhenyi/opt/miniconda3/bin/:/opt/homebrew/bin');
+    setenv('PATH','/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/zhenyi/miniconda3/bin/');
 elseif isunix
     [~,sumohome]=system("source ~/.bashrc;echo $SUMO_HOME");
     sumohome=sumohome(1:length(sumohome)-1);
@@ -167,9 +167,6 @@ for ii=1:length(vTypes)
         route_collect=strcat(route_collect,", ");
     end
     route_collect=strcat(route_collect,vTypes{ii},'/',vTypes{ii},'_',sprintf("%03d",iterMax-1),'.rou.xml');
-    
-    
-    
     
     route_name=strcat(vTypes{ii},'_',sprintf("%03d",iterMax-1),'.rou.xml');
     route_file=fileread(route_name);

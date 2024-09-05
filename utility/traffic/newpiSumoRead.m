@@ -77,10 +77,14 @@ if ~isequal(e,'.xml'), error('Only xml file supported');end
 end
 %% Get all the information of vehicles and persons and store them as a struct
 
-pyScriptPath=fullfile(piRootPath,'data','sumo_input','xml2json.py');
-genJsonCmd="python "+pyScriptPath+" -f "+flowFile+" -t "+lightFile;
+pyScriptPath=fullfile(iaRootPath,'data','sumo_input','xml2json.py');
+if ~isempty(lightFile)
+    genJsonCmd=strcat("python ",pyScriptPath," -f ",flowFile," -t ",lightFile);
+else
+    genJsonCmd=strcat("python ",pyScriptPath," -f ",flowFile);
+end
 outputCmd=" -o vehicleState.json";
-sysCmd=genJsonCmd+outputCmd;
+sysCmd=strcat(genJsonCmd,outputCmd);
 system(sysCmd)
 trafficflow=jsonread('vehicleState.json');
 

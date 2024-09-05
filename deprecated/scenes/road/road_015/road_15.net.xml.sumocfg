@@ -1,0 +1,10 @@
+<configuration>
+    <input>
+        <net-file value="/Users/zhenyi/git_repo/dev/isetauto/data/scenes/road/road_015/road_15.net.xml"/>
+        <route-files value="passenger/passenger_000.rou.xml"/>
+    </input>
+    <time>
+        <begin value="0"/>
+        <end value="20"/>
+    </time>
+</configuration>

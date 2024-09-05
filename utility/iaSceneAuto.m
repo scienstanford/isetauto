@@ -48,7 +48,11 @@ if ~exist(parameter.general.outputDirecotry, 'dir')
     mkdir(parameter.general.outputDirecotry);
 end
 %% Flywheel init
-st = scitran('stanfordlabs');
+if ~getpref('ISETAuto','local')
+    st = scitran('stanfordlabs');
+else
+    st = [];
+end
 
 %% Read a road from Flywheel that we will use with SUMO and SUSO
 [sceneInfo,sceneR] = iaRoadCreate('roadtype',roadType,...
@@ -115,23 +119,29 @@ if isempty(parameter.scene.susoplaced)
         disp('No SUSO assets placed.  Not city or suburb');
     end
     parameter.scene.susoplaced = susoPlaced;
+    save(([iaRootPath,'/data/suso/',...
+        parameter.scene.sceneType,'_',parameter.scene.roadType,'.mat']),'parameter');
+    return; % tmp
 else
     susoPlaced =parameter.scene.susoplaced;
 end
+% Add objects to scene
+sceneR = iaObjectsAssemble(sceneR, susoPlaced);
 %% Place vehicles/pedestrians from  SUMO traffic flow data on the road
 % Put the suso placed assets on the road
 if isempty(parameter.scene.sumoplaced)
     disp('--> SUMO is planning...')
-    [sumoPlaced, ~] = iaSUMOPlace(trafficflow,...
-        'timestamp',timestamp,...
-        'scitran',st);
+    % [sumoPlaced, ~] = iaSUMOPlace(trafficflow,...
+    %     'timestamp',timestamp,...
+    %     'scitran',st);
+    [sumoPlaced, ~] = iaSUMOAssemble(trafficflow,...
+        'timestamp',timestamp);
     parameter.scene.sumoplaced = sumoPlaced;
 else
     sumoPlaced = parameter.scene.sumoplaced;
 end
-%% Add objects to scene
-sceneR = iaObjectsAssemble(sceneR, susoPlaced);
-sceneR = iaObjectsAssemble(sceneR, sumoPlaced);
+% Add objects to scene
+% sceneR = iaObjectsAssemble(sceneR, sumoPlaced);
 
 sceneR.set('traffic flow density',trafficflowDensity);
 sceneR.set('traffic timestamp',timestamp);
