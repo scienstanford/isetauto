@@ -110,7 +110,7 @@ if isempty(st), st = scitran('stanfordlabs');end
 
 %% generate list of assets(not finished) from flywheel, unfinished
 if (addStreetlight ==true)
-    streetlight_listPath = fullfile(iaRootPath,'local','AssetLists','streetlight_list.mat');
+    streetlight_listPath = fullfile(iaRootPath,'data','suso','streetlight_list.mat');
     if ~exist(streetlight_listPath,'file')
         streetlight_list = iaAssetListCreate('session','others',...
                                              'acquisition','streetlight_tall',...
@@ -122,7 +122,7 @@ if (addStreetlight ==true)
 end
 
 if (addTree ==true)
-    tree_listPath = fullfile(iaRootPath,'local','AssetLists','tree_list.mat');
+    tree_listPath = fullfile(iaRootPath,'data','suso','tree_list.mat');
     if ~exist(tree_listPath,'file')
         tree_list = iaAssetListCreate('session','tree',...
                                       'scitran',st);
@@ -134,7 +134,7 @@ end
 
 % offset_garbage= 0.8;
 if ~(trashcan_number==0)
-    trashcan_listPath = fullfile(iaRootPath,'local','AssetLists','trashcan_list.mat');
+    trashcan_listPath = fullfile(iaRootPath,'data','suso','trashcan_list.mat');
     if ~exist(trashcan_listPath,'file')
         trashcan_list = iaAssetListCreate('session','others',...
                                           'acquisition','trashcan',...
@@ -146,7 +146,7 @@ if ~(trashcan_number==0)
 end
 
 if ~(station_number==0)
-    station_listPath = fullfile(iaRootPath,'local','AssetLists','station_list.mat');
+    station_listPath = fullfile(iaRootPath,'data','suso','station_list.mat');
     if ~exist(station_listPath,'file')
         station_list = iaAssetListCreate('session','others',...
                                          'acquisition','station',...
@@ -158,7 +158,7 @@ if ~(station_number==0)
 end
 
 if ~(bench_number==0)
-    bench_listPath = fullfile(iaRootPath,'local','AssetLists','bench_list.mat');
+    bench_listPath = fullfile(iaRootPath,'data','suso','bench_list.mat');
     if ~exist(bench_listPath,'file')
         bench_list = iaAssetListCreate('session','others',...
                                        'acquisition','bench',...
@@ -170,7 +170,7 @@ if ~(bench_number==0)
 end
 
 if ~(billboard_number==0)
-    billboard_listPath = fullfile(iaRootPath,'local','AssetLists','billboard_list.mat');
+    billboard_listPath = fullfile(iaRootPath,'data','suso','billboard_list.mat');
     if ~exist(billboard_listPath,'file')
         billboard_list = iaAssetListCreate('session','others',...
                                            'acquisition','billboard',...
@@ -182,7 +182,7 @@ if ~(billboard_number==0)
 end
 
 if ~(callbox_number==0)
-    callbox_listPath = fullfile(iaRootPath,'local','AssetLists','callbox_list.mat');
+    callbox_listPath = fullfile(iaRootPath,'data','suso','callbox_list.mat');
     if ~exist(callbox_listPath,'file')
         callbox_list = iaAssetListCreate('session','others',...
                                          'acquisition','callbox',...
@@ -194,7 +194,7 @@ if ~(callbox_number==0)
 end
 
 if ~(bikerack_number==0)
-    bikerack_listPath = fullfile(iaRootPath,'local','AssetLists','bikerack_list.mat');
+    bikerack_listPath = fullfile(iaRootPath,'data','suso','bikerack_list.mat');
     if ~exist(bikerack_listPath,'file')    
     bikerack_list = iaAssetListCreate('session','others',...
                                          'acquisition','bikerack',...

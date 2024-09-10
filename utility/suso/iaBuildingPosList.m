@@ -40,7 +40,7 @@ function [buildingPosList, buildingList] = iaBuildingPosList(sceneType, sceneRec
 if ~exist('st', 'var') 
     st = scitran('stanfordlabs');
 end
-buildingListPath = fullfile(iaRootPath,'local','AssetLists',...
+buildingListPath = fullfile(iaRootPath,'data','suso',...
     sprintf('%s_building_list.mat',sceneType));
 
 if ~exist(buildingListPath,'file')
@@ -50,6 +50,63 @@ else
     load(buildingListPath,'buildingList');
 end
 %%
+switch sceneType
+    case 'city1'
+        nn=1;
+        for ii = 1:length(buildingList)
+            if contains(buildingList(ii).name,{'_022','_023','_024','_025'})
+                newBuildingList(nn) = buildingList(ii);nn=nn+1;
+            end
+        end
+        buildingList = newBuildingList;
+    case 'city2'
+        nn=1;
+        for ii = 1:length(buildingList)
+            if contains(buildingList(ii).name,{'_026', '_027', '_028', '_029', '_030',...
+                                                '_031', '_032', '_033', '_034', '_035',...
+                                                '_036', '_037', '_038', '_039', '_040',...
+                                                '_041', '_042', '_043', '_044','_45',...
+                                                '_46', '_47', '_48', '_49', '_50',...
+                                                '_51', '_52', '_53', '_54', '_55',...
+                                                '_56', '_57', '_58', '_59', '_60'})
+                newBuildingList(nn) = buildingList(ii);nn=nn+1;
+            end
+        end
+        buildingList = newBuildingList;
+    case 'city3'
+        nn=1;
+        for ii = 1:length(buildingList)
+            if contains(buildingList(ii).name,{'_26', '_27', '_28', '_29', '_30',...
+                                                '_31', '_32', '_33', '_34', '_36',...
+                                                '_37', '_38', '_40', '_41', '_42',...
+                                                '_43', '_45', '_46', '_47', '_48',...
+                                                '_49', '_50', '_51', '_52'})
+                newBuildingList(nn) = buildingList(ii);nn=nn+1;
+            end
+        end
+        buildingList = newBuildingList;
+    case 'city4'
+        nn=1;
+        for ii = 1:length(buildingList)
+            if contains(buildingList(ii).name,{'_01', '_02', '_03', '_04', '_05', '_06',...
+                    '_07', '_08', '_09', '_10', '_11', '_12', '_13', '_14', '_15', '_16',...
+                    '_17', '_18', '_19', '_22', '_23', '_24', '_25', '_26', '_27', '_29',...
+                    '_30', '_32', '_33', '_34', '_35', '_37', '_38', '_39', '_40', '_41',...
+                    '_42', '_43', '_44'})
+                newBuildingList(nn) = buildingList(ii);nn=nn+1;
+            end
+        end
+        buildingList = newBuildingList;
+    case 'suburb'
+        nn=1;
+        for ii = 1:length(buildingList)
+            if contains(buildingList(ii).name,{'_010','_016','_018','_019'})
+                newBuildingList(nn) = buildingList(ii);nn=nn+1;
+            end
+        end
+        buildingList = newBuildingList;        
+end
+
 buildingPosList = struct;
 for ii = 1:length(buildingList)
     building_list.size(ii, 1) = buildingList(ii).size.l;
